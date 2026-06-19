@@ -1,0 +1,83 @@
+.kpi-card {
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  transition: all var(--transition);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--brand);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.kpi-card.estado-bom {
+  border-color: var(--ok);
+  background: linear-gradient(135deg, var(--ok-bg-strong) 0%, var(--bg-card) 100%);
+}
+
+.kpi-card.estado-critico {
+  border-color: var(--danger);
+  background: linear-gradient(135deg, var(--danger-bg-strong) 0%, var(--bg-card) 100%);
+}
+
+.kpi-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.kpi-label svg {
+  width: 1rem;
+  height: 1rem;
+  fill: currentColor;
+  opacity: 0.9;
+}
+
+.kpi-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 1.5vw, 1.6rem);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  color: var(--text-heading);
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi-subvalue {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: clamp(0.7rem, 0.85vw, 0.85rem);
+  font-weight: 600;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi-card.estado-critico .kpi-value {
+  color: var(--danger-light);
+}
+
+.kpi-card.estado-critico .kpi-subvalue {
+  color: var(--danger);
+}
+
+.kpi-card.estado-bom .kpi-value {
+  color: var(--ok-light);
+}
+
+.kpi-card.estado-bom .kpi-subvalue {
+  color: var(--ok);
+}
