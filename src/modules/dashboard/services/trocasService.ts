@@ -313,16 +313,14 @@ export const getTrocasHistory = async (
 };
 
 export const getTrocasByDateRange = async (
-  userId: string,
   startDate: string,
   endDate: string
 ): Promise<TrocasData[]> => {
   try {
-    logger.debug('trocasService', `Buscando trocas por periodo`, { userId, startDate, endDate });
+    logger.debug('trocasService', `Buscando trocas por periodo`, { startDate, endDate });
     const trocasRef = collection(db, TROCAS_COLLECTION);
     const q = query(
       trocasRef,
-      where('usuario_id', '==', userId),
       where('data', '>=', startDate),
       where('data', '<=', endDate)
     );

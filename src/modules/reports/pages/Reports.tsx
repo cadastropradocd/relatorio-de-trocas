@@ -39,7 +39,7 @@ export const Reports: React.FC = () => {
     setError(null);
 
     try {
-      const result = await getTrocasByDateRange(user.id, startDate, endDate);
+      const result = await getTrocasByDateRange(startDate, endDate);
       setData(result);
       setLoaded(true);
     } catch (err) {
