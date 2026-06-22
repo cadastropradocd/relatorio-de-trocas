@@ -290,15 +290,13 @@ export const updateSetor = async (
 };
 
 export const getTrocasHistory = async (
-  userId: string,
   limitCount: number = 30
 ): Promise<TrocasData[]> => {
   try {
-    logger.debug('trocasService', `Buscando historico para usuario: ${userId}`, { limitCount });
+    logger.debug('trocasService', `Buscando historico`, { limitCount });
     const trocasRef = collection(db, TROCAS_COLLECTION);
     const q = query(
       trocasRef,
-      where('usuario_id', '==', userId),
       firestoreLimit(limitCount)
     );
 

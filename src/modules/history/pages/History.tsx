@@ -24,7 +24,7 @@ export const History: React.FC = () => {
     setError(null);
 
     try {
-      const data = await getTrocasHistory(user.id, 30);
+      const data = await getTrocasHistory(30);
       setHistory(data);
     } catch (err) {
       setError('Erro ao carregar histórico');
