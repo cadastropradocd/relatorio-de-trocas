@@ -299,7 +299,6 @@ export const getTrocasHistory = async (
     const q = query(
       trocasRef,
       where('usuario_id', '==', userId),
-      orderBy('data', 'desc'),
       firestoreLimit(limitCount)
     );
 
@@ -307,7 +306,8 @@ export const getTrocasHistory = async (
     logger.debug('trocasService', `${querySnapshot.size} registros encontrados no historico`);
     return querySnapshot.docs
       .map((docSnap) => docToTrocasData(docSnap))
-      .filter((item): item is TrocasData => item !== null);
+      .filter((item): item is TrocasData => item !== null)
+      .sort((a, b) => b.data.localeCompare(a.data));
   } catch (error) {
     logger.error('trocasService', 'Erro ao buscar historico', error);
     throw error;
@@ -326,15 +326,15 @@ export const getTrocasByDateRange = async (
       trocasRef,
       where('usuario_id', '==', userId),
       where('data', '>=', startDate),
-      where('data', '<=', endDate),
-      orderBy('data', 'asc')
+      where('data', '<=', endDate)
     );
 
     const querySnapshot = await getDocs(q);
     logger.debug('trocasService', `${querySnapshot.size} registros encontrados no periodo`);
     return querySnapshot.docs
       .map((docSnap) => docToTrocasData(docSnap))
-      .filter((item): item is TrocasData => item !== null);
+      .filter((item): item is TrocasData => item !== null)
+      .sort((a, b) => a.data.localeCompare(b.data));
   } catch (error) {
     logger.error('trocasService', 'Erro ao buscar trocas por periodo', error);
     throw error;
