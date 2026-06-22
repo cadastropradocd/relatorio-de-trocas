@@ -12,6 +12,7 @@ import {
 import {
   createUserWithEmailAndPassword,
   deleteUser as firebaseDeleteUser,
+  signInWithEmailAndPassword,
 } from 'firebase/auth';
 import { auth, db } from '../../../shared/services/firebase';
 import type { User } from '../../../shared/types/trocas';
@@ -106,7 +107,18 @@ export const createUser = async (data: CreateUserData): Promise<User> => {
       criado_em: new Date().toISOString(),
     };
 
-    await setDoc(doc(db, USUARIOS_COLLECTION, uid), userData);
+    try {
+      await setDoc(doc(db, USUARIOS_COLLECTION, uid), userData);
+    } catch (firestoreError) {
+      logger.error('userService', 'Erro ao criar documento no Firestore, limpando Auth', firestoreError);
+      try {
+        const currentUser = auth.currentUser;
+        if (currentUser) await firebaseDeleteUser(currentUser);
+      } catch {
+        logger.error('userService', 'Erro ao limpar conta órfã do Auth');
+      }
+      throw new Error('Erro ao criar perfil. Tente novamente.');
+    }
 
     logger.info('userService', 'Usuario criado com sucesso');
 
@@ -122,6 +134,24 @@ export const createUser = async (data: CreateUserData): Promise<User> => {
   } catch (error) {
     const err = error as { code?: string; message?: string };
     const errorCode = err.code || 'unknown';
+
+    if (errorCode === 'auth/email-already-in-use') {
+      logger.warn('userService', 'Email já existe no Auth, verificando Firestore');
+      const existingUser = await getUserByUsername(data.username);
+      if (!existingUser) {
+        try {
+          await signInWithEmailAndPassword(auth, email, data.password);
+          const uid = auth.currentUser?.uid;
+          if (uid) {
+            await firebaseDeleteUser(auth.currentUser!);
+            logger.info('userService', 'Conta órfã removida do Auth');
+            return createUser(data);
+          }
+        } catch {
+          logger.error('userService', 'Não foi possível limpar conta órfã');
+        }
+      }
+    }
 
     const errorMessages: Record<string, string> = {
       'auth/email-already-in-use': 'Este nome de usuário já está cadastrado.',
