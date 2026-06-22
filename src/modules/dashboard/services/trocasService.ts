@@ -62,17 +62,15 @@ const docToTrocasData = (docSnap: { exists(): boolean; id: string; data(): Recor
 };
 
 export const getTrocasByDate = async (
-  date: string,
-  userId: string
+  date: string
 ): Promise<TrocasData | null> => {
   try {
-    logger.debug('trocasService', `Buscando trocas para ${date}`, { userId });
+    logger.debug('trocasService', `Buscando trocas para ${date}`);
 
     const trocasRef = collection(db, TROCAS_COLLECTION);
     const q = query(
       trocasRef,
       where('data', '==', date),
-      where('usuario_id', '==', userId),
       firestoreLimit(1)
     );
 
@@ -349,7 +347,7 @@ export const getOrCreateTrocas = async (
 ): Promise<TrocasData | null> => {
   logger.info('trocasService', `getOrCreateTrocas: ${date}`, { userId });
 
-  const existingData = await getTrocasByDate(date, userId);
+  const existingData = await getTrocasByDate(date);
 
   if (existingData) {
     logger.info('trocasService', 'Retornando dados existentes');

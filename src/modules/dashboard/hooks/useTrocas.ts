@@ -35,10 +35,10 @@ export const useTrocas = (date: string): UseTrocasReturn => {
     setError(null);
     setHasChanges(false);
 
-    logger.info('useTrocas', `Carregando trocas para ${date}`, { userId: user.id });
+    logger.info('useTrocas', `Carregando trocas para ${date}`);
 
     try {
-      const existingData = await getTrocasByDate(date, user.id);
+      const existingData = await getTrocasByDate(date);
 
       if (existingData) {
         logger.info('useTrocas', `Dados existentes: ${existingData.setores.length} setores`);
