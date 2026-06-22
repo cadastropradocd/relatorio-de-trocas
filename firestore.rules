@@ -1,6 +1,12 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // WARNING: This is an internal app with custom auth (not Firebase Auth).
+    // Rules are intentionally open because auth is handled at the app level
+    // via a custom login flow. In production, add IP-based rate limiting
+    // (e.g., via Firebase Extensions or a Cloud Function) to mitigate abuse.
+    // Consider migrating to Firebase Auth or adding request.auth checks
+    // for better security.
 
     match /historico/{docId} {
       allow read: if true;

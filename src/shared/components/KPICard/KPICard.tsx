@@ -62,6 +62,7 @@ export const KPICard: React.FC<KPICardProps> = ({ data, animate = false }) => {
         data.status === 'positivo' ? 'estado-bom' : ''
       }`}
       data-tooltip={data.tooltip}
+      aria-label={`${data.label}: ${data.formattedValue}${data.subValue ? ` - ${data.subValue}` : ''}`}
     >
       <span className="kpi-label">
         {data.icon}

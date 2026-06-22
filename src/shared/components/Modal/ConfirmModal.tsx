@@ -22,6 +22,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   cancelText = 'Cancelar',
   confirmVariant = 'danger',
 }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
   const previousOverflow = useRef<string>('');
 
   const handleEscape = useCallback((e: KeyboardEvent): void => {
@@ -41,6 +42,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
       previousOverflow.current = document.body.style.overflow;
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
+      modalRef.current?.focus();
     }
 
     return () => {
@@ -53,7 +55,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
   return (
     <div className="modal-backdrop" onClick={handleBackdropClick}>
-      <div className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" ref={modalRef} tabIndex={-1}>
         <div className="modal-header">
           <h2 id="modal-title">{title}</h2>
           <button className="modal-close" onClick={onClose} aria-label="Fechar">

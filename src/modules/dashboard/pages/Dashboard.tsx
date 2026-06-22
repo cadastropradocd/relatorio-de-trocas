@@ -121,7 +121,7 @@ export const Dashboard: React.FC = () => {
     }
   }, [saveAll, addToast]);
 
-  const handleExport = async (): Promise<void> => {
+  const handleExport = useCallback(async (): Promise<void> => {
     if (!dashboardRef.current) return;
 
     setIsExporting(true);
@@ -160,7 +160,7 @@ export const Dashboard: React.FC = () => {
     } finally {
       setIsExporting(false);
     }
-  };
+  }, [date, addToast]);
 
   if (loading) {
     return (

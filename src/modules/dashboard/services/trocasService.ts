@@ -7,7 +7,7 @@ import {
   updateDoc,
   query,
   where,
-  orderBy,
+
   limit as firestoreLimit,
   serverTimestamp,
 } from 'firebase/firestore';
@@ -65,24 +65,29 @@ export const getTrocasByDate = async (
   date: string,
   userId: string
 ): Promise<TrocasData | null> => {
-  logger.debug('trocasService', `Buscando trocas para ${date}`, { userId });
+  try {
+    logger.debug('trocasService', `Buscando trocas para ${date}`, { userId });
 
-  const trocasRef = collection(db, TROCAS_COLLECTION);
-  const q = query(
-    trocasRef,
-    where('data', '==', date),
-    where('usuario_id', '==', userId),
-    firestoreLimit(1)
-  );
+    const trocasRef = collection(db, TROCAS_COLLECTION);
+    const q = query(
+      trocasRef,
+      where('data', '==', date),
+      where('usuario_id', '==', userId),
+      firestoreLimit(1)
+    );
 
-  const querySnapshot = await getDocs(q);
-  if (querySnapshot.empty) {
-    logger.debug('trocasService', 'Nenhuma troca encontrada para esta data');
-    return null;
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+      logger.debug('trocasService', 'Nenhuma troca encontrada para esta data');
+      return null;
+    }
+
+    logger.debug('trocasService', 'Troca encontrada', { docId: querySnapshot.docs[0].id });
+    return docToTrocasData(querySnapshot.docs[0]);
+  } catch (error) {
+    logger.error('trocasService', 'Erro ao buscar trocas por data', error);
+    throw error;
   }
-
-  logger.debug('trocasService', 'Troca encontrada', { docId: querySnapshot.docs[0].id });
-  return docToTrocasData(querySnapshot.docs[0]);
 };
 
 export const createTrocas = async (
@@ -297,6 +302,7 @@ export const getTrocasHistory = async (
     const trocasRef = collection(db, TROCAS_COLLECTION);
     const q = query(
       trocasRef,
+      orderBy('data', 'desc'),
       firestoreLimit(limitCount)
     );
 

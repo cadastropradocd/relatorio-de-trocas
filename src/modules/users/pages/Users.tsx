@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../app/providers/AuthProvider';
 import { useToast } from '../../../app/providers/ToastProvider';
 import { getAllUsers, createUser, updateUser, deleteUser, migrateExistingUsers } from '../services/userService';
@@ -22,6 +23,7 @@ interface FormData {
 const EMPTY_FORM: FormData = { name: '', username: '', password: '', role: 'user' };
 
 export const Users: React.FC = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { addToast } = useToast();
 
@@ -70,7 +72,7 @@ export const Users: React.FC = () => {
     setForm(EMPTY_FORM);
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+  const handleSubmit = useCallback(async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setSubmitting(true);
 
@@ -109,9 +111,9 @@ export const Users: React.FC = () => {
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [modalMode, form, editingUser, addToast, closeModal, loadUsers, navigate]);
 
-  const handleDelete = async (): Promise<void> => {
+  const handleDelete = useCallback(async (): Promise<void> => {
     if (!deleteTarget) return;
     try {
       await deleteUser(deleteTarget.id);
@@ -122,11 +124,11 @@ export const Users: React.FC = () => {
       addToast('Erro ao excluir usuário', 'error');
       logger.error('Users', 'Erro ao excluir usuário', err);
     }
-  };
+  }, [deleteTarget, addToast, loadUsers]);
 
   const [migrating, setMigrating] = useState<boolean>(false);
 
-  const handleMigrate = async (): Promise<void> => {
+  const handleMigrate = useCallback(async (): Promise<void> => {
     setMigrating(true);
     try {
       const result = await migrateExistingUsers();
@@ -138,7 +140,7 @@ export const Users: React.FC = () => {
     } finally {
       setMigrating(false);
     }
-  };
+  }, [addToast, loadUsers]);
 
   if (!user || user.role !== 'admin') return null;
 

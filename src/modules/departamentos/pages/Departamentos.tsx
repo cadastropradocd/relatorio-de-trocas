@@ -67,7 +67,7 @@ export const Departamentos: React.FC = () => {
     setFormMeta('');
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+  const handleSubmit = useCallback(async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
 
     const nome = formNome.trim();
@@ -102,9 +102,9 @@ export const Departamentos: React.FC = () => {
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [editingId, formNome, formMeta, addToast, closeForm, loadDepartamentos]);
 
-  const handleDelete = async (): Promise<void> => {
+  const handleDelete = useCallback(async (): Promise<void> => {
     if (!deleteTarget) return;
     try {
       await deleteDepartamento(deleteTarget.id);
@@ -117,9 +117,9 @@ export const Departamentos: React.FC = () => {
       logger.error('Departamentos', errorMsg, err);
       addToast(errorMsg, 'error');
     }
-  };
+  }, [deleteTarget, addToast, loadDepartamentos]);
 
-  const handleToggleAtivo = async (dep: Departamento): Promise<void> => {
+  const handleToggleAtivo = useCallback(async (dep: Departamento): Promise<void> => {
     try {
       await updateDepartamento(dep.id, { ativo: !dep.ativo });
       await loadDepartamentos();
@@ -129,9 +129,9 @@ export const Departamentos: React.FC = () => {
       logger.error('Departamentos', errorMsg, err);
       addToast(errorMsg, 'error');
     }
-  };
+  }, [addToast, loadDepartamentos]);
 
-  const handleSeedDefaults = async (): Promise<void> => {
+  const handleSeedDefaults = useCallback(async (): Promise<void> => {
     logger.info('Departamentos', 'Botão Cadastrar padrão clicado');
     try {
       logger.info('Departamentos', 'Chamando seedDepartamentos...');
@@ -146,7 +146,7 @@ export const Departamentos: React.FC = () => {
       logger.error('Departamentos', errorMsg, err);
       addToast(errorMsg, 'error');
     }
-  };
+  }, [addToast, loadDepartamentos]);
 
   if (!user || user.role !== 'admin') return null;
 

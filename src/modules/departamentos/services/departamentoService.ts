@@ -5,6 +5,8 @@ import {
   setDoc,
   deleteDoc,
   updateDoc,
+  query,
+  where,
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../../../shared/services/firebase';
@@ -44,10 +46,11 @@ export const getAllDepartamentos = async (): Promise<Departamento[]> => {
 export const getDepartamentosAtivos = async (): Promise<Departamento[]> => {
   try {
     logger.info('departamentoService', 'Buscando departamentos ativos');
-    const all = await getAllDepartamentos();
-    const ativos = all.filter((d) => d.ativo);
-    logger.debug('departamentoService', `${ativos.length} departamentos ativos encontrados`);
-    return ativos;
+    const q = query(collection(db, DEPARTAMENTOS_COLLECTION), where('ativo', '==', true));
+    const snapshot = await getDocs(q);
+    const departamentos = snapshot.docs.map(docToDepartamento);
+    logger.debug('departamentoService', `${departamentos.length} departamentos ativos encontrados`);
+    return departamentos.sort((a, b) => a.ordem - b.ordem);
   } catch (error) {
     logger.error('departamentoService', 'Erro ao buscar departamentos ativos', error);
     throw error;

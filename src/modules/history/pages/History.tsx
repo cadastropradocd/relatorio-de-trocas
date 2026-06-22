@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../app/providers/AuthProvider';
 import { getTrocasHistory } from '../../dashboard/services/trocasService';
-import { formatarDataDiaMesAno, formatBRL } from '../../../shared/utils/formatters';
+import { formatBRL } from '../../../shared/utils/formatters';
 import { Loading } from '../../../shared/components/Loading';
 import { Error } from '../../../shared/components/Error';
 import { Header } from '../../../shared/components/Header';

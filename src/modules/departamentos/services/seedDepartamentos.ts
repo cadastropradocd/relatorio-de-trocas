@@ -16,30 +16,35 @@ const DEFAULT_DEPARTAMENTOS = [
 ];
 
 export const seedDepartamentos = async (): Promise<{ created: number; skipped: number }> => {
-  logger.info('seedDepartamentos', 'Iniciando seed...');
+  try {
+    logger.info('seedDepartamentos', 'Iniciando seed...');
 
-  const snapshot = await getDocs(collection(db, 'departamentos'));
-  logger.info('seedDepartamentos', `Documentos existentes: ${snapshot.size}`);
+    const snapshot = await getDocs(collection(db, 'departamentos'));
+    logger.info('seedDepartamentos', `Documentos existentes: ${snapshot.size}`);
 
-  if (!snapshot.empty) {
-    logger.info('seedDepartamentos', 'Coleção já possui dados, pulando seed');
-    return { created: 0, skipped: snapshot.size };
+    if (!snapshot.empty) {
+      logger.info('seedDepartamentos', 'Coleção já possui dados, pulando seed');
+      return { created: 0, skipped: snapshot.size };
+    }
+
+    let created = 0;
+    for (const dep of DEFAULT_DEPARTAMENTOS) {
+      const id = uuidv4();
+      logger.debug('seedDepartamentos', `Criando: ${dep.nome}`, { id, meta: dep.meta_mensal });
+
+      await setDoc(doc(db, 'departamentos', id), {
+        ...dep,
+        ativo: true,
+        criado_em: serverTimestamp(),
+        atualizado_em: serverTimestamp(),
+      });
+      created++;
+    }
+
+    logger.info('seedDepartamentos', `Seed concluído: ${created} departamentos criados`);
+    return { created, skipped: 0 };
+  } catch (error) {
+    logger.error('seedDepartamentos', 'Erro ao executar seed', error);
+    throw error;
   }
-
-  let created = 0;
-  for (const dep of DEFAULT_DEPARTAMENTOS) {
-    const id = uuidv4();
-    logger.debug('seedDepartamentos', `Criando: ${dep.nome}`, { id, meta: dep.meta_mensal });
-
-    await setDoc(doc(db, 'departamentos', id), {
-      ...dep,
-      ativo: true,
-      criado_em: serverTimestamp(),
-      atualizado_em: serverTimestamp(),
-    });
-    created++;
-  }
-
-  logger.info('seedDepartamentos', `Seed concluído: ${created} departamentos criados`);
-  return { created, skipped: 0 };
 };
