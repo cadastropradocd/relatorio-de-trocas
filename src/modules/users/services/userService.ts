@@ -120,8 +120,19 @@ export const createUser = async (data: CreateUserData): Promise<User> => {
       criado_em: new Date().toISOString(),
     };
   } catch (error) {
-    logger.error('userService', 'Erro ao criar usuario', error);
-    throw error;
+    const err = error as { code?: string; message?: string };
+    const errorCode = err.code || 'unknown';
+
+    const errorMessages: Record<string, string> = {
+      'auth/email-already-in-use': 'Este nome de usuário já está cadastrado.',
+      'auth/invalid-email': 'Nome de usuário inválido.',
+      'auth/weak-password': 'A senha deve ter pelo menos 6 caracteres.',
+      'auth/network-request-failed': 'Erro de conexão. Verifique sua internet.',
+    };
+
+    const friendlyMessage = errorMessages[errorCode] || 'Erro ao criar usuário';
+    logger.error('userService', 'Erro ao criar usuario', { code: errorCode, message: friendlyMessage });
+    throw new Error(friendlyMessage);
   }
 };
 
