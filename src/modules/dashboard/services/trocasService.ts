@@ -7,7 +7,7 @@ import {
   updateDoc,
   query,
   where,
-
+  orderBy,
   limit as firestoreLimit,
   serverTimestamp,
 } from 'firebase/firestore';
