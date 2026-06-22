@@ -9,14 +9,9 @@ import {
   where,
   limit as firestoreLimit,
 } from 'firebase/firestore';
-import {
-  createUserWithEmailAndPassword,
-  deleteUser as firebaseDeleteUser,
-  signInWithEmailAndPassword,
-} from 'firebase/auth';
-import { auth, db } from '../../../shared/services/firebase';
+import { db } from '../../../shared/services/firebase';
 import type { User } from '../../../shared/types/trocas';
-import { usernameToEmail, convertFirestoreTimestamp } from '../../../shared/utils/auth';
+import { convertFirestoreTimestamp } from '../../../shared/utils/auth';
 import { logger } from '../../../shared/utils/logger';
 
 export interface CreateUserData {
@@ -33,6 +28,14 @@ export interface UpdateUserData {
 }
 
 const USUARIOS_COLLECTION = 'usuarios';
+
+const hashPassword = async (password: string): Promise<string> => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+};
 
 const docToUser = (docSnap: { id: string; data(): Record<string, unknown> }): User => {
   const data = docSnap.data();
@@ -91,34 +94,27 @@ export const getUserByUsername = async (username: string): Promise<User | null> 
 export const createUser = async (data: CreateUserData): Promise<User> => {
   try {
     logger.info('userService', `Criando usuario: ${data.username}`);
-    const email = usernameToEmail(data.username);
 
-    await createUserWithEmailAndPassword(auth, email, data.password);
+    const existing = await getUserByUsername(data.username.trim().toLowerCase());
+    if (existing) {
+      throw new Error('Este nome de usuário já está cadastrado.');
+    }
 
-    const uid = auth.currentUser?.uid;
-    if (!uid) throw new Error('Erro: UID não disponível após criação');
+    const passwordHash = await hashPassword(data.password);
+    const email = `${data.username.toLowerCase().trim()}@trocas.app`;
+    const uid = crypto.randomUUID();
 
     const userData = {
-      username: data.username,
+      username: data.username.trim().toLowerCase(),
       email,
       name: data.name,
+      password_hash: passwordHash,
       avatar_url: null,
       role: data.role,
       criado_em: new Date().toISOString(),
     };
 
-    try {
-      await setDoc(doc(db, USUARIOS_COLLECTION, uid), userData);
-    } catch (firestoreError) {
-      logger.error('userService', 'Erro ao criar documento no Firestore, limpando Auth', firestoreError);
-      try {
-        const currentUser = auth.currentUser;
-        if (currentUser) await firebaseDeleteUser(currentUser);
-      } catch {
-        logger.error('userService', 'Erro ao limpar conta órfã do Auth');
-      }
-      throw new Error('Erro ao criar perfil. Tente novamente.');
-    }
+    await setDoc(doc(db, USUARIOS_COLLECTION, uid), userData);
 
     logger.info('userService', 'Usuario criado com sucesso');
 
@@ -132,46 +128,7 @@ export const createUser = async (data: CreateUserData): Promise<User> => {
       criado_em: new Date().toISOString(),
     };
   } catch (error) {
-    const err = error as { code?: string; message?: string };
-    const errorCode = err.code || 'unknown';
-
-    if (errorCode === 'auth/email-already-in-use') {
-      logger.warn('userService', 'Email já existe no Auth, verificando Firestore');
-      const existingUser = await getUserByUsername(data.username);
-      if (!existingUser) {
-        try {
-          await signInWithEmailAndPassword(auth, email, data.password);
-          const uid = auth.currentUser?.uid;
-          if (uid) {
-            await firebaseDeleteUser(auth.currentUser!);
-            logger.info('userService', 'Conta órfã removida do Auth');
-            return createUser(data);
-          }
-        } catch {
-          logger.error('userService', 'Não foi possível limpar conta órfã');
-        }
-      }
-    }
-
-    const errorMessages: Record<string, string> = {
-      'auth/email-already-in-use': 'Este nome de usuário já está cadastrado.',
-      'auth/invalid-email': 'Nome de usuário inválido.',
-      'auth/weak-password': 'A senha deve ter pelo menos 6 caracteres.',
-      'auth/network-request-failed': 'Erro de conexão. Verifique sua internet.',
-    };
-
-    const friendlyMessage = errorMessages[errorCode] || 'Erro ao criar usuário';
-    logger.error('userService', 'Erro ao criar usuario', { code: errorCode, message: friendlyMessage });
-    throw new Error(friendlyMessage);
-  }
-};
-
-export const reloginAsAdmin = async (adminEmail: string, adminPassword: string): Promise<void> => {
-  try {
-    await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
-    logger.info('userService', 'Admin relogado com sucesso');
-  } catch (error) {
-    logger.error('userService', 'Erro ao relogar admin', error);
+    logger.error('userService', 'Erro ao criar usuario', error);
     throw error;
   }
 };
@@ -202,10 +159,6 @@ export const deleteUser = async (userId: string): Promise<void> => {
   try {
     logger.info('userService', `Deletando usuario: ${userId}`);
     await deleteDoc(doc(db, USUARIOS_COLLECTION, userId));
-    const firebaseUser = auth.currentUser;
-    if (firebaseUser && firebaseUser.uid === userId) {
-      await firebaseDeleteUser(firebaseUser);
-    }
     logger.info('userService', 'Usuario deletado com sucesso');
   } catch (error) {
     logger.error('userService', 'Erro ao deletar usuario', error);
@@ -222,7 +175,7 @@ export const migrateExistingUsers = async (): Promise<{ migrated: number; skippe
 
     for (const docSnap of snapshot.docs) {
       const data = docSnap.data();
-      if (data.username) {
+      if (data.username && data.password_hash) {
         skipped++;
         continue;
       }

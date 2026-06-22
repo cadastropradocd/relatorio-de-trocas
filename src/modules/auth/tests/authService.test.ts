@@ -1,139 +1,108 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { signIn, signUp, signOut, onAuthStateChange } from '../services/authService';
-
-const { mockSignIn, mockCreateUser, mockSignOut, mockOnAuthStateChanged, mockGetDoc } = vi.hoisted(() => ({
-  mockSignIn: vi.fn(),
-  mockCreateUser: vi.fn(),
-  mockSignOut: vi.fn(),
-  mockOnAuthStateChanged: vi.fn(),
-  mockGetDoc: vi.fn().mockResolvedValue({
-    exists: () => false,
-    data: () => undefined,
-  }),
-}));
 
 vi.mock('../../../shared/services/firebase', () => ({
-  auth: {
-    signInWithEmailAndPassword: mockSignIn,
-    createUserWithEmailAndPassword: mockCreateUser,
-    signOut: mockSignOut,
-    onAuthStateChanged: mockOnAuthStateChanged,
-  },
-  db: {
-    doc: vi.fn(),
-    getDoc: mockGetDoc,
-    setDoc: vi.fn(),
-    deleteDoc: vi.fn(),
-    collection: vi.fn(),
-  },
-}));
-
-vi.mock('firebase/auth', () => ({
-  signInWithEmailAndPassword: (...args: unknown[]) => mockSignIn(...args),
-  createUserWithEmailAndPassword: (...args: unknown[]) => mockCreateUser(...args),
-  signOut: (...args: unknown[]) => mockSignOut(...args),
-  onAuthStateChanged: (...args: unknown[]) => mockOnAuthStateChanged(...args),
-  updateProfile: vi.fn().mockResolvedValue(undefined),
+  db: { collection: vi.fn() },
 }));
 
 vi.mock('firebase/firestore', () => ({
-  doc: vi.fn(),
-  getDoc: (...args: unknown[]) => mockGetDoc(...args),
-  setDoc: vi.fn(),
-  deleteDoc: vi.fn(),
   collection: vi.fn(),
-  serverTimestamp: vi.fn(() => 'mock-timestamp'),
+  query: vi.fn(),
+  where: vi.fn(),
+  getDocs: vi.fn(),
+  setDoc: vi.fn(),
+  doc: vi.fn(),
 }));
+
+vi.mock('../../../shared/utils/auth', () => ({
+  convertFirestoreTimestamp: (v: unknown) => {
+    if (v && typeof v === 'object' && 'toDate' in v) {
+      return (v as { toDate: () => Date }).toDate().toISOString();
+    }
+    if (typeof v === 'string') return v;
+    return new Date().toISOString();
+  },
+}));
+
+const mockGetDocs = vi.mocked((await import('firebase/firestore')).getDocs);
+
+const { signIn, signUp, signOut, getCurrentUser } = await import('../services/authService');
 
 describe('AuthService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
   });
 
   describe('signIn', () => {
-    it('deve retornar null quando o login for bem-sucedido', async () => {
-      mockSignIn.mockResolvedValue({
-        user: { uid: '123', email: 'test@example.com' },
-      });
+    it('deve retornar erro quando o usuário não existe', async () => {
+      mockGetDocs.mockResolvedValue({ empty: true, docs: [] });
 
-      const result = await signIn('test@example.com', 'password123');
-      expect(result).toBeNull();
-      expect(mockSignIn).toHaveBeenCalledWith(
-        expect.anything(),
-        'test@example.com',
-        'password123'
-      );
+      const result = await signIn('naoexiste', 'password123');
+      expect(result).toEqual({ message: 'Usuário ou senha incorretos.' });
     });
 
-    it('deve retornar erro quando o login falhar', async () => {
-      mockSignIn.mockRejectedValue({
-        code: 'auth/invalid-credential',
-      });
+    it('deve retornar erro quando a senha está incorreta', async () => {
+      const mockUserDoc = {
+        id: 'user-123',
+        data: () => ({
+          username: 'testuser',
+          email: 'testuser@trocas.app',
+          name: 'Test User',
+          password_hash: 'hash_diferente',
+          role: 'user',
+          criado_em: '2026-01-01',
+        }),
+      };
 
-      const result = await signIn('test@example.com', 'wrongpassword');
-      expect(result).toEqual({ message: 'Usuario ou senha incorretos.' });
+      mockGetDocs.mockResolvedValue({ empty: false, docs: [mockUserDoc] });
+
+      const result = await signIn('testuser', 'senhaerrada');
+      expect(result).toEqual({ message: 'Usuário ou senha incorretos.' });
     });
   });
 
   describe('signUp', () => {
     it('deve retornar null quando o cadastro for bem-sucedido', async () => {
-      mockCreateUser.mockResolvedValue({
-        user: {
-          uid: '123',
-          email: 'test@example.com',
-          displayName: null,
-          photoURL: null,
-          metadata: { creationTime: '2023-01-01' },
-        },
-      });
+      mockGetDocs.mockResolvedValue({ empty: true, docs: [] });
+      vi.mocked((await import('firebase/firestore')).setDoc).mockResolvedValue(undefined);
 
-      const result = await signUp('testuser', 'password123', 'Test User');
+      const result = await signUp('novouser', 'password123', 'Novo User');
       expect(result).toBeNull();
-      expect(mockCreateUser).toHaveBeenCalled();
     });
 
-    it('deve retornar erro quando o cadastro falhar', async () => {
-      mockCreateUser.mockRejectedValue({
-        code: 'auth/email-already-in-use',
+    it('deve retornar erro quando o username já existe', async () => {
+      mockGetDocs.mockResolvedValue({
+        empty: false,
+        docs: [{ id: 'existing', data: () => ({ username: 'testuser' }) }],
       });
 
       const result = await signUp('testuser', 'password123', 'Test User');
-      expect(result).toEqual({ message: 'Este nome de usuario ja esta cadastrado.' });
+      expect(result).toEqual({ message: 'Este nome de usuário já está cadastrado.' });
     });
   });
 
   describe('signOut', () => {
-    it('deve chamar signOut do Firebase', async () => {
-      mockSignOut.mockResolvedValue(undefined);
-
+    it('deve limpar a sessão do localStorage', async () => {
+      localStorage.setItem('trocas_session', JSON.stringify({ user: {}, timestamp: Date.now() }));
       await signOut();
-      expect(mockSignOut).toHaveBeenCalled();
+      expect(localStorage.getItem('trocas_session')).toBeNull();
     });
   });
 
-  describe('onAuthStateChange', () => {
-    it('deve chamar o callback quando o estado de autenticacao mudar', async () => {
-      const callback = vi.fn();
+  describe('getCurrentUser', () => {
+    it('deve retornar null quando não há sessão', async () => {
+      const result = await getCurrentUser();
+      expect(result).toBeNull();
+    });
 
-      mockOnAuthStateChanged.mockImplementation(
-        (_authInstance: unknown, firebaseCallback: (user: unknown) => void) => {
-          firebaseCallback({
-            uid: '123',
-            email: 'test@example.com',
-            displayName: null,
-            photoURL: null,
-            metadata: { creationTime: '2023-01-01' },
-          });
-          return vi.fn();
-        }
-      );
+    it('deve retornar null quando a sessão expirou', async () => {
+      localStorage.setItem('trocas_session', JSON.stringify({
+        user: { username: 'test' },
+        timestamp: Date.now() - 25 * 60 * 60 * 1000,
+      }));
 
-      onAuthStateChange(callback);
-      expect(mockOnAuthStateChanged).toHaveBeenCalled();
-
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      expect(callback).toHaveBeenCalledWith('SIGNED_IN');
+      const result = await getCurrentUser();
+      expect(result).toBeNull();
     });
   });
 });

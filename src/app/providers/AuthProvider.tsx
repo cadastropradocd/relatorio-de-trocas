@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, type ReactNode } from 'react';
 import type { User } from '../../shared/types/trocas';
-import { getCurrentUser, onAuthStateChange, signIn as authSignIn, signOut as authSignOut, signUp as authSignUp } from '../../modules/auth/services/authService';
-import { logger } from '../../shared/utils/logger';
+import { getCurrentUser, onAuthStateChange, signIn as authSignIn, signOut as authSignOut, signUp as authSignUp } from '../services/authService';
 
 interface AuthContextType {
   user: User | null;
@@ -28,7 +27,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const currentUser = await getCurrentUser();
         setUser(currentUser);
       } catch (error) {
-        logger.error('AuthProvider', 'Erro ao carregar usuário', error);
+        console.error('Erro ao carregar usuário:', error);
       } finally {
         setLoading(false);
       }
@@ -79,7 +78,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(currentUser);
       }
     } catch {
-      // Usuário pode precisar confirmar o e-mail
+      // User may need to confirm email
     }
 
     return null;

@@ -1,65 +1,75 @@
 import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-  updateProfile,
-  type User as FirebaseUser,
-} from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
-import { auth, db } from '../../../shared/services/firebase';
+  collection,
+  query,
+  where,
+  getDocs,
+  setDoc,
+  doc,
+} from 'firebase/firestore';
+import { db } from '../../../shared/services/firebase';
 import type { User } from '../../../shared/types/trocas';
-import { usernameToEmail, convertFirestoreTimestamp } from '../../../shared/utils/auth';
 import { logger } from '../../../shared/utils/logger';
 
-export interface AuthError {
-  message: string;
-}
+const USUARIOS_COLLECTION = 'usuarios';
+const SESSION_KEY = 'trocas_session';
 
-const firebaseUserToUser = async (firebaseUser: FirebaseUser): Promise<User | null> => {
-  const fallback: User = {
-    id: firebaseUser.uid,
-    username: firebaseUser.email?.split('@')[0] || '',
-    email: firebaseUser.email || '',
-    name: firebaseUser.displayName ?? null,
-    avatar_url: firebaseUser.photoURL ?? null,
-    role: 'user',
-    criado_em: firebaseUser.metadata.creationTime || new Date().toISOString(),
-  };
-
-  try {
-    const userDoc = await getDoc(doc(db, 'usuarios', firebaseUser.uid));
-
-    if (!userDoc.exists()) {
-      return fallback;
-    }
-
-    const data = userDoc.data();
-    return {
-      ...fallback,
-      username: (data['username'] as string) ?? fallback.username,
-      name: (data['name'] as string) ?? fallback.name,
-      avatar_url: (data['avatar_url'] as string) ?? fallback.avatar_url,
-      role: (data['role'] as 'admin' | 'user') ?? 'user',
-      criado_em: convertFirestoreTimestamp(data['criado_em']),
-    };
-  } catch {
-    return fallback;
-  }
+const hashPassword = async (password: string): Promise<string> => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 };
 
 export const signIn = async (username: string, password: string): Promise<AuthError | null> => {
   try {
-    logger.info('authService', 'Iniciando login', { username });
-    const email = username.includes('@') ? username : usernameToEmail(username);
-    await signInWithEmailAndPassword(auth, email, password);
+    logger.info('authService', `Tentando login: ${username}`);
+
+    const q = query(
+      collection(db, USUARIOS_COLLECTION),
+      where('username', '==', username.trim().toLowerCase())
+    );
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      logger.warn('authService', 'Usuário não encontrado');
+      return { message: 'Usuário ou senha incorretos.' };
+    }
+
+    const userDoc = snapshot.docs[0];
+    const userData = userDoc.data();
+    const storedHash = userData.password_hash as string;
+
+    if (!storedHash) {
+      logger.error('authService', 'Usuário sem senha_hash');
+      return { message: 'Erro ao autenticar. Tente novamente.' };
+    }
+
+    const inputHash = await hashPassword(password);
+
+    if (inputHash !== storedHash) {
+      logger.warn('authService', 'Senha incorreta');
+      return { message: 'Usuário ou senha incorretos.' };
+    }
+
+    const user: User = {
+      id: userDoc.id,
+      username: userData.username as string,
+      email: userData.email as string || '',
+      name: userData.name as string || null,
+      avatar_url: userData.avatar_url as string || null,
+      role: userData.role as 'admin' | 'user',
+      criado_em: userData.criado_em as string || new Date().toISOString(),
+    };
+
+    const session = { user, timestamp: Date.now() };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+
     logger.info('authService', 'Login realizado com sucesso');
     return null;
-  } catch (error: unknown) {
-    const code = (error as { code?: string }).code || 'auth/unknown-error';
-    const message = getFirebaseAuthErrorMessage(code);
-    logger.error('authService', 'Erro ao fazer login', { code, message });
-    return { message };
+  } catch (error) {
+    logger.error('authService', 'Erro ao fazer login', error);
+    return { message: 'Erro ao autenticar. Tente novamente.' };
   }
 };
 
@@ -69,95 +79,83 @@ export const signUp = async (
   name: string
 ): Promise<AuthError | null> => {
   try {
-    logger.info('authService', 'Criando nova conta', { username });
-    const email = usernameToEmail(username);
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const firebaseUser = userCredential.user;
+    logger.info('authService', `Criando conta: ${username}`);
+    const email = `${username.toLowerCase().trim()}@trocas.app`;
+    const passwordHash = await hashPassword(password);
 
-    await updateProfile(firebaseUser, { displayName: name });
+    const q = query(
+      collection(db, USUARIOS_COLLECTION),
+      where('username', '==', username.trim().toLowerCase())
+    );
+    const existing = await getDocs(q);
 
-    try {
-      await setDoc(doc(db, 'usuarios', firebaseUser.uid), {
-        username,
-        email,
-        name,
-        avatar_url: null,
-        role: 'user',
-        criado_em: serverTimestamp(),
-      });
-    } catch {
-      await firebaseUser.delete().catch(() => {});
-      return { message: 'Erro ao criar perfil. Tente novamente.' };
+    if (!existing.empty) {
+      return { message: 'Este nome de usuário já está cadastrado.' };
     }
+
+    const uid = crypto.randomUUID();
+    await setDoc(doc(db, USUARIOS_COLLECTION, uid), {
+      username: username.trim().toLowerCase(),
+      email,
+      name,
+      password_hash: passwordHash,
+      avatar_url: null,
+      role: 'user',
+      criado_em: new Date().toISOString(),
+    });
 
     logger.info('authService', 'Conta criada com sucesso');
     return null;
-  } catch (error: unknown) {
-    const code = (error as { code?: string }).code || 'auth/unknown-error';
-    const message = getFirebaseAuthErrorMessage(code);
-    logger.error('authService', 'Erro ao criar conta', { code, message });
-    return { message };
+  } catch (error) {
+    logger.error('authService', 'Erro ao criar conta', error);
+    return { message: 'Erro ao criar conta. Tente novamente.' };
   }
 };
 
 export const signOut = async (): Promise<void> => {
-  try {
-    logger.info('authService', 'Fazendo logout');
-    await firebaseSignOut(auth);
-    logger.info('authService', 'Logout realizado com sucesso');
-  } catch (error: unknown) {
-    logger.error('authService', 'Erro ao fazer logout', error);
-    throw error;
-  }
+  localStorage.removeItem(SESSION_KEY);
+  logger.info('authService', 'Logout realizado');
 };
 
 export const getCurrentUser = async (): Promise<User | null> => {
-  return new Promise((resolve) => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      unsubscribe();
-      if (!firebaseUser) {
-        resolve(null);
-        return;
-      }
-      const user = await firebaseUserToUser(firebaseUser);
-      resolve(user);
-    });
-  });
-};
+  const session = localStorage.getItem(SESSION_KEY);
+  if (!session) return null;
 
-export const onAuthStateChange = (
-  callback: (event: string) => void
-): { data: { subscription: { unsubscribe: () => void } } } => {
-  const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-    if (firebaseUser) {
-      await firebaseUserToUser(firebaseUser);
-      callback('SIGNED_IN');
-    } else {
-      callback('SIGNED_OUT');
+  try {
+    const { user, timestamp } = JSON.parse(session);
+    if (Date.now() - timestamp > 24 * 60 * 60 * 1000) {
+      localStorage.removeItem(SESSION_KEY);
+      return null;
     }
-  });
 
-  return {
-    data: {
-      subscription: { unsubscribe },
-    },
-  };
+    const q = query(
+      collection(db, USUARIOS_COLLECTION),
+      where('username', '==', user.username)
+    );
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      localStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+
+    const userData = snapshot.docs[0].data();
+    return {
+      id: snapshot.docs[0].id,
+      username: userData.username as string,
+      email: userData.email as string || '',
+      name: userData.name as string || null,
+      avatar_url: userData.avatar_url as string || null,
+      role: userData.role as 'admin' | 'user',
+      criado_em: userData.criado_em as string || new Date().toISOString(),
+    };
+  } catch (error) {
+    logger.error('authService', 'Erro ao verificar sessão', error);
+    localStorage.removeItem(SESSION_KEY);
+    return null;
+  }
 };
 
-const getFirebaseAuthErrorMessage = (code: string): string => {
-  const messages: Record<string, string> = {
-    'auth/email-already-in-use': 'Este nome de usuario ja esta cadastrado.',
-    'auth/invalid-email': 'Nome de usuario invalido.',
-    'auth/operation-not-allowed': 'Operacao nao permitida.',
-    'auth/weak-password': 'A senha deve ter pelo menos 6 caracteres.',
-    'auth/user-disabled': 'Esta conta foi desabilitada.',
-    'auth/user-not-found': 'Usuario nao encontrado.',
-    'auth/wrong-password': 'Senha incorreta.',
-    'auth/invalid-credential': 'Usuario ou senha incorretos.',
-    'auth/too-many-requests': 'Muitas tentativas. Tente novamente mais tarde.',
-    'auth/network-request-failed': 'Erro de conexao. Verifique sua internet.',
-    'auth/popup-closed-by-user': 'Janela de login fechada.',
-    'auth/missing-email': 'Informe um nome de usuario.',
-  };
-  return messages[code] || 'Erro ao autenticar. Tente novamente.';
-};
+export interface AuthError {
+  message: string;
+}
