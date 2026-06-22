@@ -88,6 +88,14 @@ export const Users: React.FC = () => {
         }
         await createUser({ username: form.username.trim(), password: form.password, name: form.name, role: form.role });
         addToast('Usuário criado com sucesso!', 'success');
+
+        const { signOut } = await import('../../../app/providers/AuthProvider');
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const { getAuth, signOut: fbSignOut } = await import('firebase/auth');
+        await fbSignOut(getAuth());
+        navigate('/login');
+        addToast('Faça login novamente para continuar.', 'info');
+        return;
       } else if (modalMode === 'edit' && editingUser) {
         await updateUser(editingUser.id, { name: form.name, username: form.username.trim(), role: form.role });
         addToast('Usuário atualizado com sucesso!', 'success');

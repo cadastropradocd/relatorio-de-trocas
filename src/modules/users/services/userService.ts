@@ -5,14 +5,12 @@ import {
   getDoc,
   setDoc,
   deleteDoc,
-  serverTimestamp,
   query,
   where,
   limit as firestoreLimit,
 } from 'firebase/firestore';
 import {
   createUserWithEmailAndPassword,
-  updateProfile,
   deleteUser as firebaseDeleteUser,
 } from 'firebase/auth';
 import { auth, db } from '../../../shared/services/firebase';
@@ -89,14 +87,15 @@ export const getUserByUsername = async (username: string): Promise<User | null> 
   }
 };
 
-export const createUser = async (data: CreateUserData): Promise<User | null> => {
+export const createUser = async (data: CreateUserData): Promise<User> => {
   try {
     logger.info('userService', `Criando usuario: ${data.username}`);
     const email = usernameToEmail(data.username);
-    const userCredential = await createUserWithEmailAndPassword(auth, email, data.password);
-    const firebaseUser = userCredential.user;
 
-    await updateProfile(firebaseUser, { displayName: data.name });
+    await createUserWithEmailAndPassword(auth, email, data.password);
+
+    const uid = auth.currentUser?.uid;
+    if (!uid) throw new Error('Erro: UID não disponível após criação');
 
     const userData = {
       username: data.username,
@@ -104,15 +103,15 @@ export const createUser = async (data: CreateUserData): Promise<User | null> => 
       name: data.name,
       avatar_url: null,
       role: data.role,
-      criado_em: serverTimestamp(),
+      criado_em: new Date().toISOString(),
     };
 
-    await setDoc(doc(db, USUARIOS_COLLECTION, firebaseUser.uid), userData);
+    await setDoc(doc(db, USUARIOS_COLLECTION, uid), userData);
 
     logger.info('userService', 'Usuario criado com sucesso');
 
     return {
-      id: firebaseUser.uid,
+      id: uid,
       username: data.username,
       email,
       name: data.name,
@@ -126,6 +125,16 @@ export const createUser = async (data: CreateUserData): Promise<User | null> => 
   }
 };
 
+export const reloginAsAdmin = async (adminEmail: string, adminPassword: string): Promise<void> => {
+  try {
+    await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
+    logger.info('userService', 'Admin relogado com sucesso');
+  } catch (error) {
+    logger.error('userService', 'Erro ao relogar admin', error);
+    throw error;
+  }
+};
+
 export const updateUser = async (userId: string, data: UpdateUserData): Promise<void> => {
   try {
     logger.info('userService', `Atualizando usuario: ${userId}`);
@@ -134,7 +143,6 @@ export const updateUser = async (userId: string, data: UpdateUserData): Promise<
     if (data.name !== undefined) updates.name = data.name;
     if (data.username !== undefined) {
       updates.username = data.username;
-      updates.email = usernameToEmail(data.username);
     }
     if (data.role !== undefined) updates.role = data.role;
 
@@ -153,7 +161,7 @@ export const deleteUser = async (userId: string): Promise<void> => {
   try {
     logger.info('userService', `Deletando usuario: ${userId}`);
     await deleteDoc(doc(db, USUARIOS_COLLECTION, userId));
-    const firebaseUser = await auth.currentUser;
+    const firebaseUser = auth.currentUser;
     if (firebaseUser && firebaseUser.uid === userId) {
       await firebaseDeleteUser(firebaseUser);
     }
