@@ -3,12 +3,10 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     match /historico/{docId} {
-      allow read: if request.auth != null && 
-        resource.data.usuario_id == request.auth.uid;
+      allow read: if request.auth != null;
       allow create: if request.auth != null && 
         request.resource.data.usuario_id == request.auth.uid;
-      allow update: if request.auth != null && 
-        resource.data.usuario_id == request.auth.uid;
+      allow update: if request.auth != null;
       allow delete: if request.auth != null && (
         resource.data.usuario_id == request.auth.uid ||
         get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role == 'admin'
