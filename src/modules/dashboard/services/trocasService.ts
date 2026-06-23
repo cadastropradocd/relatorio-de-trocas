@@ -9,6 +9,7 @@ import {
   where,
   orderBy,
   limit as firestoreLimit,
+  startAfter,
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../../../shared/services/firebase';
@@ -293,23 +294,23 @@ export const updateSetor = async (
 };
 
 export const getTrocasHistory = async (
-  limitCount: number = 30
+  limitCount: number = 30,
+  lastDate?: string
 ): Promise<TrocasData[]> => {
   try {
-    logger.debug('trocasService', `Buscando historico`, { limitCount });
+    logger.debug('trocasService', `Buscando historico`, { limitCount, lastDate });
+
     const trocasRef = collection(db, TROCAS_COLLECTION);
-    const q = query(
-      trocasRef,
-      orderBy('data', 'desc'),
-      firestoreLimit(limitCount)
-    );
+    const q = lastDate
+      ? query(trocasRef, orderBy('data', 'desc'), firestoreLimit(limitCount), startAfter(lastDate))
+      : query(trocasRef, orderBy('data', 'desc'), firestoreLimit(limitCount));
 
     const querySnapshot = await getDocs(q);
+
     logger.debug('trocasService', `${querySnapshot.size} registros encontrados no historico`);
     return querySnapshot.docs
       .map((docSnap) => docToTrocasData(docSnap))
-      .filter((item): item is TrocasData => item !== null)
-      .sort((a, b) => b.data.localeCompare(a.data));
+      .filter((item): item is TrocasData => item !== null);
   } catch (error) {
     logger.error('trocasService', 'Erro ao buscar historico', error);
     throw error;
