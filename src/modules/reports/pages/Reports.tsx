@@ -1,13 +1,14 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useAuth } from '../../../app/providers/AuthProvider';
 import { getTrocasByDateRange } from '../../dashboard/services/trocasService';
+import { getAllDepartamentos } from '../../departamentos/services/departamentoService';
 import { BarChart } from '../../../shared/components/Chart';
 import { Loading } from '../../../shared/components/Loading';
 import { Error } from '../../../shared/components/Error';
 import { IconTotal, IconMeta, IconDiferenca } from '../../../shared/components/Icons';
 import { formatBRL, formatarDataDiaMesAno } from '../../../shared/utils/formatters';
 import { logger } from '../../../shared/utils/logger';
-import type { TrocasData, KPIData } from '../../../shared/types/trocas';
+import type { TrocasData, KPIData, Departamento, Setor } from '../../../shared/types/trocas';
 import './Reports.css';
 
 const getDefaultRange = (): { start: string; end: string } => {
@@ -20,6 +21,13 @@ const getDefaultRange = (): { start: string; end: string } => {
   };
 };
 
+const calculateTotals = (setores: Setor[]) => {
+  const total_realizado = setores.reduce((sum, s) => sum + s.realizado, 0);
+  const total_meta = setores.reduce((sum, s) => sum + s.meta, 0);
+  const total_diferenca = total_realizado - total_meta;
+  return { total_realizado, total_meta, total_diferenca };
+};
+
 export const Reports: React.FC = () => {
   const { user } = useAuth();
   const defaults = getDefaultRange();
@@ -29,8 +37,50 @@ export const Reports: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState<boolean>(false);
+  const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showFilter, setShowFilter] = useState<boolean>(false);
 
   const isDateRangeValid = startDate <= endDate;
+  const nomeDepartamentos = departamentos.map((d) => d.nome);
+  const allSelected = selectedIds.length === 0 || selectedIds.length === nomeDepartamentos.length;
+
+  useEffect(() => {
+    getAllDepartamentos()
+      .then((deps) => {
+        setDepartamentos(deps);
+        setSelectedIds(deps.map((d) => d.nome));
+      })
+      .catch((err) => logger.error('Reports', 'Erro ao carregar departamentos', err));
+  }, []);
+
+  const toggleDepartamento = useCallback((nome: string): void => {
+    setSelectedIds((prev) =>
+      prev.includes(nome) ? prev.filter((n) => n !== nome) : [...prev, nome]
+    );
+  }, []);
+
+  const selectAll = useCallback((): void => {
+    setSelectedIds(nomeDepartamentos);
+  }, [nomeDepartamentos]);
+
+  const clearAll = useCallback((): void => {
+    setSelectedIds([]);
+  }, []);
+
+  const filteredData = useMemo(() => {
+    if (allSelected) return data;
+
+    return data.map((item) => {
+      const filteredSetores = item.setores.filter((s) => selectedIds.includes(s.categoria));
+      const totals = calculateTotals(filteredSetores);
+      return {
+        ...item,
+        setores: filteredSetores,
+        ...totals,
+      };
+    }).filter((item) => item.setores.length > 0);
+  }, [data, selectedIds, allSelected]);
 
   const loadReport = useCallback(async (): Promise<void> => {
     if (!user) return;
@@ -51,8 +101,8 @@ export const Reports: React.FC = () => {
   }, [user, startDate, endDate]);
 
   const kpis = useMemo<KPIData[]>(() => {
-    const totalRealizado = data.reduce((sum, t) => sum + t.total_realizado, 0);
-    const totalMeta = data.reduce((sum, t) => sum + t.total_meta, 0);
+    const totalRealizado = filteredData.reduce((sum, t) => sum + t.total_realizado, 0);
+    const totalMeta = filteredData.reduce((sum, t) => sum + t.total_meta, 0);
     const totalDiferenca = totalRealizado - totalMeta;
 
     return [
@@ -79,19 +129,25 @@ export const Reports: React.FC = () => {
         status: totalDiferenca > 0 ? 'negativo' : 'positivo',
       },
     ];
-  }, [data]);
+  }, [filteredData]);
 
   const chartData = useMemo(() => {
-    return data.map((t) => ({
-      id: t.data,
-      categoria: formatarDataDiaMesAno(new Date(t.data + 'T00:00:00')),
-      realizado: t.total_realizado,
-      meta: t.total_meta,
-      diferenca: t.total_diferenca,
-      percentual: t.total_meta > 0 ? ((t.total_realizado - t.total_meta) / t.total_meta) * 100 : 0,
-      status: (t.total_realizado - t.total_meta > 0 ? 'negativo' : t.total_realizado - t.total_meta < 0 ? 'positivo' : 'neutro') as 'positivo' | 'negativo' | 'neutro',
-    }));
-  }, [data]);
+    return filteredData.map((t) => {
+      const totals = t.setores.length > 0
+        ? calculateTotals(t.setores)
+        : { total_realizado: 0, total_meta: 0, total_diferenca: 0 };
+
+      return {
+        id: t.data,
+        categoria: formatarDataDiaMesAno(new Date(t.data + 'T00:00:00')),
+        realizado: totals.total_realizado,
+        meta: totals.total_meta,
+        diferenca: totals.total_diferenca,
+        percentual: totals.total_meta > 0 ? ((totals.total_realizado - totals.total_meta) / totals.total_meta) * 100 : 0,
+        status: (totals.total_diferenca > 0 ? 'negativo' : totals.total_diferenca < 0 ? 'positivo' : 'neutro') as 'positivo' | 'negativo' | 'neutro',
+      };
+    });
+  }, [filteredData]);
 
   if (loading && !loaded) {
     return <Loading message="Carregando relatório..." />;
@@ -129,6 +185,40 @@ export const Reports: React.FC = () => {
             onChange={(e) => setEndDate(e.target.value)}
           />
         </div>
+
+        {departamentos.length > 0 && (
+          <div className="filter-group filter-departamentos">
+            <label>Departamentos</label>
+            <button
+              className="filter-toggle"
+              onClick={() => setShowFilter((prev) => !prev)}
+            >
+              {allSelected
+                ? 'Todos os departamentos'
+                : `${selectedIds.length} selecionado(s)`}
+              <span className={`filter-arrow ${showFilter ? 'open' : ''}`}>▼</span>
+            </button>
+            {showFilter && (
+              <div className="filter-dropdown">
+                <div className="filter-actions">
+                  <button className="filter-action-btn" onClick={selectAll}>Todos</button>
+                  <button className="filter-action-btn" onClick={clearAll}>Nenhum</button>
+                </div>
+                {departamentos.map((dep) => (
+                  <label key={dep.id} className="filter-option">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(dep.nome)}
+                      onChange={() => toggleDepartamento(dep.nome)}
+                    />
+                    <span>{dep.nome}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         <button
           className="btn-primary"
           onClick={loadReport}
@@ -143,7 +233,7 @@ export const Reports: React.FC = () => {
 
       {loaded && (
         <>
-          {data.length === 0 ? (
+          {filteredData.length === 0 ? (
             <div className="reports-empty">
               <p>Nenhum dado encontrado para o período selecionado.</p>
             </div>
@@ -183,7 +273,7 @@ export const Reports: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.map((t) => {
+                        {filteredData.map((t) => {
                           const diff = t.total_diferenca;
                           return (
                             <tr key={t.id}>
