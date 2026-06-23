@@ -91,10 +91,6 @@ export const Users: React.FC = () => {
         await createUser({ username: form.username.trim(), password: form.password, name: form.name, role: form.role });
         addToast('Usuário criado com sucesso!', 'success');
 
-        const { signOut } = await import('../../../app/providers/AuthProvider');
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { getAuth, signOut: fbSignOut } = await import('firebase/auth');
-        await fbSignOut(getAuth());
         navigate('/login');
         addToast('Faça login novamente para continuar.', 'info');
         return;
@@ -153,7 +149,7 @@ export const Users: React.FC = () => {
   }
 
   return (
-    <div className="users-page">
+    <div className="users-page" style={{ animation: 'fadeInUp 0.4s ease' }}>
       <header className="users-header">
         <h1>
           <span className="title-bar" />

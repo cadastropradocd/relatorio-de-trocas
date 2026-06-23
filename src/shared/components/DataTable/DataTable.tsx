@@ -67,9 +67,10 @@ export const DataTable: React.FC<DataTableProps> = ({
   }, []);
 
   React.useEffect(() => {
+    const timers = feedbackTimersRef.current;
     return () => {
-      feedbackTimersRef.current.forEach((timer) => clearTimeout(timer));
-      feedbackTimersRef.current.clear();
+      timers.forEach((timer) => clearTimeout(timer));
+      timers.clear();
     };
   }, []);
 
@@ -96,7 +97,7 @@ export const DataTable: React.FC<DataTableProps> = ({
       const { id, field } = input.dataset;
       if (!id || !field) return;
 
-      const cleanValue = input.value.replace(/[^0-9.,\-]/g, '').replace(',', '.');
+      const cleanValue = input.value.replace(/[^0-9.,-]/g, '').replace(',', '.');
       const num = parseFloat(cleanValue);
 
       if (isNaN(num) || num < 0) {
@@ -159,7 +160,7 @@ export const DataTable: React.FC<DataTableProps> = ({
         </thead>
         <tbody>
           {sortedData.map((row) => (
-            <tr key={row.id}>
+            <tr key={row.id} className={row.categoria === melhorSetor ? 'row-melhor' : row.categoria === setorCritico ? 'row-critico' : ''}>
               <td style={{ textAlign: 'left' }}>
                 <div className="setor-cell">
                   <span>{row.categoria}</span>

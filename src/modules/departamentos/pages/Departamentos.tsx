@@ -122,6 +122,7 @@ export const Departamentos: React.FC = () => {
   const handleToggleAtivo = useCallback(async (dep: Departamento): Promise<void> => {
     try {
       await updateDepartamento(dep.id, { ativo: !dep.ativo });
+      addToast(dep.ativo ? 'Departamento desativado!' : 'Departamento ativado!', 'success');
       await loadDepartamentos();
     } catch (err) {
       const errorObj = err as { code?: string; message?: string };
@@ -154,7 +155,7 @@ export const Departamentos: React.FC = () => {
   if (loadError) return <Error message={loadError} onRetry={loadDepartamentos} />;
 
   return (
-    <div className="departamentos-page">
+    <div className="departamentos-page" style={{ animation: 'fadeInUp 0.4s ease' }}>
       <header className="departamentos-header">
         <h1>
           <span className="title-bar" />

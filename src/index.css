@@ -150,7 +150,8 @@ img {
 
 @media (max-width: 768px) {
   .main-content {
-    margin-left: 64px;
+    margin-left: 0;
+    padding-bottom: 64px;
   }
 }
 

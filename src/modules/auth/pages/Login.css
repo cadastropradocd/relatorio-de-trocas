@@ -158,6 +158,11 @@
   margin-bottom: 1rem;
 }
 
+/* Login Form Wrap (transition) */
+.login-form-wrap {
+  animation: fadeInUp 0.3s ease;
+}
+
 /* Login Footer */
 .login-footer {
   margin-top: 1.5rem;

@@ -109,6 +109,48 @@
   animation: spin 0.8s linear infinite;
 }
 
+/* Pull to Refresh */
+.pull-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.pull-arrow {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s ease;
+  color: var(--text-muted);
+}
+
+.pull-arrow.pull-ready {
+  color: var(--brand);
+}
+
+.pull-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.dashboard {
+  transition: transform 0.15s ease-out;
+}
+
 /* Empty State */
 .empty-state {
   text-align: center;

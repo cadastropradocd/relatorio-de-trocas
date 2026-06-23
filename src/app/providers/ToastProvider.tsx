@@ -88,6 +88,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useToast = (): ToastContextType => {
   const context = useContext(ToastContext);
   if (context === undefined) {

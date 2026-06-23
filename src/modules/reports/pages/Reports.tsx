@@ -259,7 +259,7 @@ export const Reports: React.FC = () => {
   const showContent = loaded && !loading;
 
   return (
-    <div className="reports">
+    <div className="reports" style={{ animation: 'fadeInUp 0.4s ease' }}>
       <header className="reports-header">
         <h1>
           <span className="title-bar" />
@@ -334,7 +334,7 @@ export const Reports: React.FC = () => {
             onClick={loadReport}
             disabled={loading || !isDateRangeValid}
           >
-            {loading ? 'Carregando...' : 'Gerar Relatório'}
+            {loading ? <><span className="btn-spinner" /> Carregando...</> : 'Gerar Relatório'}
           </button>
           {isDateRangeValid && diasSelecionados && (
             <span className="dias-hint" style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>

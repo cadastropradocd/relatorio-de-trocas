@@ -54,6 +54,15 @@ export const History: React.FC = () => {
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState<boolean>(true);
+  const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleScroll = (): void => {
+      setShowScrollTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const loadHistory = useCallback(async (): Promise<void> => {
     if (!user) return;
@@ -130,7 +139,7 @@ export const History: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="history-page">
+      <div className="history-page" style={{ animation: 'fadeInUp 0.4s ease' }}>
         <Header title="HISTÓRICO DE TROCAS" />
         <div className="history-summary">
           <SkeletonKPI />
@@ -150,7 +159,7 @@ export const History: React.FC = () => {
 
   if (error) {
     return (
-      <div className="history-page">
+      <div className="history-page" style={{ animation: 'fadeInUp 0.4s ease' }}>
         <Header title="HISTÓRICO DE TROCAS" />
         <Error message={error} onRetry={loadHistory} />
       </div>
@@ -158,7 +167,7 @@ export const History: React.FC = () => {
   }
 
   return (
-    <div className="history-page">
+    <div className="history-page" style={{ animation: 'fadeInUp 0.4s ease' }}>
       <Header title="HISTÓRICO DE TROCAS" />
 
       {history.length === 0 ? (
@@ -280,6 +289,19 @@ export const History: React.FC = () => {
               </div>
             )}
           </section>
+
+          {showScrollTop && (
+            <button
+              className="scroll-top-btn"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              aria-label="Voltar ao topo"
+              title="Voltar ao topo"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="18 15 12 9 6 15" />
+              </svg>
+            </button>
+          )}
         </>
       )}
     </div>

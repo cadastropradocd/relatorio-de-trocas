@@ -70,6 +70,33 @@ tbody tr:hover {
   background: rgba(59, 130, 246, 0.08);
 }
 
+/* Destaque linha melhor/crítico */
+tr.row-melhor {
+  border-left: 3px solid var(--ok);
+  background: var(--ok-bg);
+}
+
+tr.row-melhor:nth-child(even) {
+  background: var(--ok-bg);
+}
+
+tr.row-melhor:hover {
+  background: var(--ok-bg-strong);
+}
+
+tr.row-critico {
+  border-left: 3px solid var(--danger);
+  background: var(--danger-bg);
+}
+
+tr.row-critico:nth-child(even) {
+  background: var(--danger-bg);
+}
+
+tr.row-critico:hover {
+  background: var(--danger-bg-strong);
+}
+
 td {
   border-bottom: 1px solid var(--border);
   border-right: 1px solid var(--border);

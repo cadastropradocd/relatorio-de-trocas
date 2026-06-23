@@ -9,6 +9,7 @@ import { KPICard } from '../../../shared/components/KPICard';
 import { DataTable } from '../../../shared/components/DataTable';
 import { SkeletonKPI, SkeletonTable } from '../../../shared/components/Skeleton';
 import { IconTotal, IconMeta, IconDiferenca } from '../../../shared/components/Icons';
+import { usePullToRefresh } from '../../../shared/hooks/usePullToRefresh';
 import type { TableColumn, KPIData } from '../../../shared/types/trocas';
 import { formatBRL, formatarStatusMetaTotal, formatarDiferenca } from '../../../shared/utils/formatters';
 import './Dashboard.css';
@@ -42,6 +43,13 @@ export const Dashboard: React.FC = () => {
 
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
+
+  const { pullDistance, isRefreshing } = usePullToRefresh(
+    dashboardRef as React.RefObject<HTMLDivElement | null>,
+    refresh,
+    60,
+    loading || isExporting
+  );
 
   const setoresAtuais = trocas?.setores || departamentos;
 
@@ -203,7 +211,23 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="dashboard" ref={dashboardRef}>
+    <div className="dashboard" ref={dashboardRef} style={{ transform: pullDistance > 0 ? `translateY(${pullDistance}px)` : undefined }}>
+      {/* Pull indicator */}
+      {(pullDistance > 0 || isRefreshing) && (
+        <div className="pull-indicator" style={{ opacity: Math.min(pullDistance / 60, 1) }}>
+          {isRefreshing ? (
+            <div className="pull-spinner" />
+          ) : (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+              className={`pull-arrow ${pullDistance >= 60 ? 'pull-ready' : ''}`}
+              style={{ transform: `rotate(${Math.min(pullDistance / 60, 1) * 180}deg)` }}
+            >
+              <polyline points="18 15 12 9 6 15" />
+            </svg>
+          )}
+          <span>{isRefreshing ? 'Atualizando...' : 'Solte para atualizar'}</span>
+        </div>
+      )}
       <Header
         title="RELATÓRIO DE TROCAS DIÁRIO"
         onExport={handleExport}
