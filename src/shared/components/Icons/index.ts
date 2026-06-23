@@ -1,1 +1,1 @@
-export { IconTotal, IconMeta, IconDiferenca } from './KPIIcons';
+export { IconTotal, IconMeta, IconDiferenca, IconAtingimento } from './KPIIcons';

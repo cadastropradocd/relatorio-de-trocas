@@ -12,9 +12,12 @@ interface BarChartProps {
 }
 
 const getChartColors = () => ({
-  realizado: '#3b82f6',
-  realizadoBorder: '#1d4ed8',
+  realizadoOk: '#3b82f6',
+  realizadoOkBorder: '#1d4ed8',
+  realizadoNok: '#ef4444',
+  realizadoNokBorder: '#dc2626',
   meta: 'rgba(251, 191, 36, 0.6)',
+  metaBorder: 'rgba(251, 191, 36, 0.8)',
   grid: 'rgba(255, 255, 255, 0.06)',
   text: '#94a3b8',
 });
@@ -28,8 +31,12 @@ export const BarChart: React.FC<BarChartProps> = ({ data }) => {
       {
         label: 'Realizado',
         data: data.map((d) => d.realizado),
-        backgroundColor: colors.realizado,
-        borderColor: colors.realizadoBorder,
+        backgroundColor: data.map((d) =>
+          d.realizado >= d.meta ? colors.realizadoOk : colors.realizadoNok
+        ),
+        borderColor: data.map((d) =>
+          d.realizado >= d.meta ? colors.realizadoOkBorder : colors.realizadoNokBorder
+        ),
         borderWidth: 2,
         borderRadius: 4,
         barPercentage: 0.65,
@@ -39,7 +46,7 @@ export const BarChart: React.FC<BarChartProps> = ({ data }) => {
         label: 'Meta',
         data: data.map((d) => d.meta),
         backgroundColor: colors.meta,
-        borderColor: 'rgba(251, 191, 36, 0.8)',
+        borderColor: colors.metaBorder,
         borderWidth: 2,
         borderRadius: 4,
         barPercentage: 0.65,
@@ -68,11 +75,27 @@ export const BarChart: React.FC<BarChartProps> = ({ data }) => {
         backgroundColor: 'rgba(0,0,0,0.8)',
         titleFont: { weight: '700' },
         bodyFont: { weight: '600' },
-        padding: 8,
+        padding: 10,
         cornerRadius: 8,
         callbacks: {
           label: (context: TooltipItem<'bar'>): string => {
-            return `${context.dataset.label}: ${formatBRL(context.raw as number)}`;
+            if (context.dataset.label === 'Realizado') {
+              const item = data[context.dataIndex];
+              if (!item) return '';
+              return `Realizado: ${formatBRL(item.realizado)}`;
+            }
+            return `Meta: ${formatBRL(context.raw as number)}`;
+          },
+          afterBody: (items): string[] => {
+            const item = data[items[0]?.dataIndex];
+            if (!item) return [];
+
+            const pct = Math.abs(item.percentual).toFixed(2).replace('.', ',');
+            const arrow = item.diferenca > 0 ? '↑' : item.diferenca < 0 ? '↓' : '→';
+            return [
+              `Diferença: ${formatBRL(Math.abs(item.diferenca))} ${arrow}`,
+              `Atingimento: ${pct}% ${arrow}`,
+            ];
           },
         },
       },
@@ -93,7 +116,7 @@ export const BarChart: React.FC<BarChartProps> = ({ data }) => {
         border: { display: false },
       },
     },
-  }), [colors]);
+  }), [data, colors]);
 
   return (
     <div className="chart-wrap">
