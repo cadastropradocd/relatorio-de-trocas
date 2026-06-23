@@ -474,7 +474,8 @@ export const Reports: React.FC = () => {
                         {sortedFilteredData.map((t) => {
                           const diff = t.total_diferenca;
                           const pct = t.total_meta > 0 ? ((t.total_realizado - t.total_meta) / t.total_meta) * 100 : 0;
-                          const isPos = pct >= 0;
+                          const pctClass = pct > 0 ? 'negative' : pct < 0 ? 'positive' : 'neutral';
+                          const pctArrow = pct > 0 ? '↑' : pct < 0 ? '↓' : '→';
                           return (
                             <tr
                               key={t.id}
@@ -494,8 +495,8 @@ export const Reports: React.FC = () => {
                               <td className="align-right">{formatBRL(t.total_realizado)}</td>
                               <td className="align-right">{formatBRL(t.total_meta)}</td>
                               <td className="align-right">
-                                <span className={`pct-badge ${isPos ? 'positive' : 'negative'}`}>
-                                  {isPos ? '↑' : '↓'} {Math.abs(pct).toFixed(2).replace('.', ',')}%
+                                <span className={`pct-badge ${pctClass}`}>
+                                  {pctArrow} {Math.abs(pct).toFixed(2).replace('.', ',')}%
                                 </span>
                               </td>
                               <td className={`align-right ${diff > 0 ? 'negative' : diff < 0 ? 'positive' : ''}`}>

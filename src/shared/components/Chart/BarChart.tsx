@@ -32,10 +32,10 @@ export const BarChart: React.FC<BarChartProps> = ({ data }) => {
         label: 'Realizado',
         data: data.map((d) => d.realizado),
         backgroundColor: data.map((d) =>
-          d.realizado >= d.meta ? colors.realizadoOk : colors.realizadoNok
+          d.realizado <= d.meta ? colors.realizadoOk : colors.realizadoNok
         ),
         borderColor: data.map((d) =>
-          d.realizado >= d.meta ? colors.realizadoOkBorder : colors.realizadoNokBorder
+          d.realizado <= d.meta ? colors.realizadoOkBorder : colors.realizadoNokBorder
         ),
         borderWidth: 2,
         borderRadius: 4,
