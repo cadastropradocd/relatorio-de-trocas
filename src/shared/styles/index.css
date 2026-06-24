@@ -1,1 +1,5 @@
+/* Material Design 3 Design Tokens */
+@import './tokens.css';
+
+/* Shared Component Styles */
 @import './shared.css';

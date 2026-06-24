@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, type TooltipItem } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import type { Setor } from '../../../shared/types/trocas';
@@ -11,19 +11,20 @@ interface BarChartProps {
   data: Setor[];
 }
 
-const getChartColors = () => ({
-  realizadoOk: '#3b82f6',
-  realizadoOkBorder: '#1d4ed8',
-  realizadoNok: '#ef4444',
-  realizadoNokBorder: '#dc2626',
-  meta: 'rgba(251, 191, 36, 0.6)',
-  metaBorder: 'rgba(251, 191, 36, 0.8)',
+const CHART_COLORS = {
+  realizadoOk: '#1565c0',
+  realizadoOkBorder: '#0d47a1',
+  realizadoNok: '#c62828',
+  realizadoNokBorder: '#8c1d18',
+  meta: 'rgba(255, 214, 0, 0.5)',
+  metaBorder: 'rgba(255, 214, 0, 0.7)',
   grid: 'rgba(255, 255, 255, 0.06)',
-  text: '#94a3b8',
-});
+  text: '#9aa0a6',
+} as const;
 
 export const BarChart: React.FC<BarChartProps> = ({ data }) => {
-  const colors = getChartColors();
+  const dataRef = useRef(data);
+  dataRef.current = data;
 
   const chartData = useMemo(() => ({
     labels: data.map((d) => d.categoria),
@@ -32,10 +33,10 @@ export const BarChart: React.FC<BarChartProps> = ({ data }) => {
         label: 'Realizado',
         data: data.map((d) => d.realizado),
         backgroundColor: data.map((d) =>
-          d.realizado <= d.meta ? colors.realizadoOk : colors.realizadoNok
+          d.realizado <= d.meta ? CHART_COLORS.realizadoOk : CHART_COLORS.realizadoNok
         ),
         borderColor: data.map((d) =>
-          d.realizado <= d.meta ? colors.realizadoOkBorder : colors.realizadoNokBorder
+          d.realizado <= d.meta ? CHART_COLORS.realizadoOkBorder : CHART_COLORS.realizadoNokBorder
         ),
         borderWidth: 2,
         borderRadius: 4,
@@ -45,15 +46,15 @@ export const BarChart: React.FC<BarChartProps> = ({ data }) => {
       {
         label: 'Meta',
         data: data.map((d) => d.meta),
-        backgroundColor: colors.meta,
-        borderColor: colors.metaBorder,
+        backgroundColor: CHART_COLORS.meta,
+        borderColor: CHART_COLORS.metaBorder,
         borderWidth: 2,
         borderRadius: 4,
         barPercentage: 0.65,
         categoryPercentage: 0.7,
       },
     ],
-  }), [data, colors]);
+  }), [data]);
 
   const options = useMemo(() => ({
     responsive: true,
@@ -64,7 +65,7 @@ export const BarChart: React.FC<BarChartProps> = ({ data }) => {
         position: 'top' as const,
         align: 'end' as const,
         labels: {
-          color: colors.text,
+          color: CHART_COLORS.text,
           font: { weight: '700', size: 10 },
           boxWidth: 12,
           boxHeight: 12,
@@ -79,15 +80,16 @@ export const BarChart: React.FC<BarChartProps> = ({ data }) => {
         cornerRadius: 8,
         callbacks: {
           label: (context: TooltipItem<'bar'>): string => {
+            const items = dataRef.current;
             if (context.dataset.label === 'Realizado') {
-              const item = data[context.dataIndex];
+              const item = items[context.dataIndex];
               if (!item) return '';
               return `Realizado: ${formatBRL(item.realizado)}`;
             }
             return `Meta: ${formatBRL(context.raw as number)}`;
           },
           afterBody: (items): string[] => {
-            const item = data[items[0]?.dataIndex];
+            const item = dataRef.current[items[0]?.dataIndex];
             if (!item) return [];
 
             const pct = Math.abs(item.percentual).toFixed(2).replace('.', ',');
@@ -102,21 +104,21 @@ export const BarChart: React.FC<BarChartProps> = ({ data }) => {
     },
     scales: {
       x: {
-        grid: { color: colors.grid, drawBorder: false },
-        ticks: { color: colors.text, font: { weight: '600', size: 9 }, maxRotation: 30 },
+        grid: { color: CHART_COLORS.grid, drawBorder: false },
+        ticks: { color: CHART_COLORS.text, font: { weight: '600', size: 9 }, maxRotation: 30 },
         border: { display: false },
       },
       y: {
-        grid: { color: colors.grid, drawBorder: false },
+        grid: { color: CHART_COLORS.grid, drawBorder: false },
         ticks: {
-          color: colors.text,
+          color: CHART_COLORS.text,
           font: { weight: '600', size: 9 },
           callback: (value: number | string): string => formatBRL(Number(value))
         },
         border: { display: false },
       },
     },
-  }), [data, colors]);
+  }), []);
 
   return (
     <div className="chart-wrap">

@@ -7,9 +7,26 @@ import { BarChart } from '../../../shared/components/Chart';
 import { IconTotal, IconMeta, IconDiferenca, IconAtingimento } from '../../../shared/components/Icons';
 import { SkeletonKPI } from '../../../shared/components/Skeleton';
 import { formatBRL, formatarDataDiaMesAno } from '../../../shared/utils/formatters';
+import { calculateTotals } from '../../../shared/utils/calculations';
 import { logger } from '../../../shared/utils/logger';
-import type { TrocasData, KPIData, Departamento, Setor } from '../../../shared/types/trocas';
+import type { TrocasData, KPIData, Departamento } from '../../../shared/types/trocas';
 import './Reports.css';
+
+// Ícones para os grupos de filtros
+const IconPeriodo = (): JSX.Element => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
+  </svg>
+);
+
+const IconDepartamento = (): JSX.Element => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21.174 6.812a1 1 0 0 0-3.986-3.612L3.842 16.112l-1.32 3.962a.5.5 0 0 0 .623.622l3.962-1.32L21.174 10.797a1 1 0 0 0 0-1.323v-.001z" />
+  </svg>
+);
 
 type PresetKey = '7d' | '30d' | 'month' | 'prev-month' | 'custom';
 
@@ -25,6 +42,14 @@ const PRESETS: Preset[] = [
   { key: 'prev-month', label: 'Mês anterior' },
   { key: 'custom', label: 'Personalizado' },
 ];
+
+const PRESET_TOOLTIPS: Record<PresetKey, string> = {
+  '7d': 'Exibe os últimos 7 dias a partir de hoje',
+  '30d': 'Exibe os últimos 30 dias a partir de hoje',
+  'month': 'Exibe todos os dias do mês atual',
+  'prev-month': 'Exibe todos os dias do mês anterior',
+  'custom': 'Selecione um período personalizado',
+};
 
 const toDateStr = (d: Date): string => d.toISOString().split('T')[0];
 
@@ -55,13 +80,6 @@ const calcPresetRange = (preset: PresetKey): { start: string; end: string } => {
   }
 };
 
-const calculateTotals = (setores: Setor[]) => {
-  const total_realizado = setores.reduce((sum, s) => sum + s.realizado, 0);
-  const total_meta = setores.reduce((sum, s) => sum + s.meta, 0);
-  const total_diferenca = total_realizado - total_meta;
-  return { total_realizado, total_meta, total_diferenca };
-};
-
 const EmptyChartIcon = (): JSX.Element => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" />
@@ -90,13 +108,23 @@ export const Reports: React.FC = () => {
 
   const isDateRangeValid = startDate <= endDate;
   const nomeDepartamentos = departamentos.map((d) => d.nome);
-  const allSelected = selectedDepts.length === 0 || selectedDepts.length === nomeDepartamentos.length;
+  const allSelected = selectedDepts.length === nomeDepartamentos.length && nomeDepartamentos.length > 0;
+  const selectedDeptCount = selectedDepts.length;
+  const totalDeptCount = nomeDepartamentos.length;
+
+  // Função para resetar todos os filtros
+  const handleResetFilters = useCallback((): void => {
+    setActivePreset('30d');
+    const defaultRange = calcPresetRange('30d');
+    setStartDate(defaultRange.start);
+    setEndDate(defaultRange.end);
+    setSelectedDepts([]); // Nenhum departamento selecionado
+  }, []);
 
   useEffect(() => {
     getAllDepartamentos()
       .then((deps) => {
         setDepartamentos(deps);
-        setSelectedDepts(deps.map((d) => d.nome));
       })
       .catch((err) => logger.error('Reports', 'Erro ao carregar departamentos', err));
   }, []);
@@ -204,18 +232,18 @@ export const Reports: React.FC = () => {
 
   const chartData = useMemo(() => {
     return filteredData.map((t) => {
-      const totals = t.setores.length > 0
-        ? calculateTotals(t.setores)
-        : { total_realizado: 0, total_meta: 0, total_diferenca: 0 };
+      const realizado = t.total_realizado ?? 0;
+      const meta = t.total_meta ?? 0;
+      const diferenca = t.total_diferenca ?? (realizado - meta);
 
       return {
         id: t.data,
         categoria: formatarDataDiaMesAno(new Date(t.data + 'T00:00:00')),
-        realizado: totals.total_realizado,
-        meta: totals.total_meta,
-        diferenca: totals.total_diferenca,
-        percentual: totals.total_meta > 0 ? ((totals.total_realizado - totals.total_meta) / totals.total_meta) * 100 : 0,
-        status: (totals.total_diferenca > 0 ? 'negativo' : totals.total_diferenca < 0 ? 'positivo' : 'neutro') as 'positivo' | 'negativo' | 'neutro',
+        realizado,
+        meta,
+        diferenca,
+        percentual: meta > 0 ? ((realizado - meta) / meta) * 100 : 0,
+        status: (diferenca > 0 ? 'negativo' : diferenca < 0 ? 'positivo' : 'neutro') as 'positivo' | 'negativo' | 'neutro',
       };
     });
   }, [filteredData]);
@@ -235,24 +263,24 @@ export const Reports: React.FC = () => {
 
   const handleSort = useCallback((key: string): void => {
     setSortKey((prev) => {
-      if (prev === key) {
-        setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-        return key;
-      }
-      setSortDir('asc');
+      if (prev === key) return prev;
       return key;
     });
-  }, []);
+    setSortDir((prev) => {
+      if (sortKey === key) return prev === 'asc' ? 'desc' : 'asc';
+      return 'asc';
+    });
+  }, [sortKey]);
 
   const handleRowClick = useCallback((date: string): void => {
     navigate(`/dashboard/${date}`);
   }, [navigate]);
 
-  const diasSelecionados = (() => {
+  const diasSelecionados = useMemo(() => {
     if (!isDateRangeValid) return '';
     const diff = Math.floor((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
     return `${diff} dia(s)`;
-  })();
+  }, [isDateRangeValid, startDate, endDate]);
 
   const showSkeleton = loading && !loaded;
   const showError = error && !loaded;
@@ -267,85 +295,112 @@ export const Reports: React.FC = () => {
         </h1>
       </header>
 
-      <section className="reports-filters" role="search" aria-label="Filtros do relatório">
-        <div className="reports-presets">
-          {PRESETS.map((p) => (
-            <button
-              key={p.key}
-              className={`preset-chip ${activePreset === p.key ? 'active' : ''}`}
-              onClick={() => applyPreset(p.key)}
-              aria-pressed={activePreset === p.key}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
+      {/* Filtros em um único card */}
+      <div className="filters-container">
+        <div className="filter-section">
+          <div className="filter-section-row">
+            <div className="filter-section-col">
+              <div className="filter-section-header">
+                <IconPeriodo />
+                <h3>Período</h3>
+              </div>
+              <div className="reports-presets">
+                {PRESETS.map((p) => (
+                  <button
+                    key={p.key}
+                    className={`preset-chip ${activePreset === p.key ? 'active' : ''}`}
+                    onClick={() => applyPreset(p.key)}
+                    aria-pressed={activePreset === p.key}
+                    title={PRESET_TOOLTIPS[p.key]}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+              <div className="filter-date-group">
+                <div className="filter-group">
+                  <label htmlFor="start-date">Data Inicial</label>
+                  <input
+                    type="date"
+                    id="start-date"
+                    value={startDate}
+                    onChange={handleStartChange}
+                    aria-label="Data inicial do relatório"
+                  />
+                </div>
+                <div className="filter-group">
+                  <label htmlFor="end-date">Data Final</label>
+                  <input
+                    type="date"
+                    id="end-date"
+                    value={endDate}
+                    onChange={handleEndChange}
+                    aria-label="Data final do relatório"
+                  />
+                </div>
+              </div>
+            </div>
 
-        <div className="filter-group">
-          <label htmlFor="start-date">Data Inicial</label>
-          <input
-            type="date"
-            id="start-date"
-            value={startDate}
-            onChange={handleStartChange}
-            aria-label="Data inicial do relatório"
-          />
-        </div>
+            <div className="filter-section-divider" />
 
-        <div className="filter-group">
-          <label htmlFor="end-date">Data Final</label>
-          <input
-            type="date"
-            id="end-date"
-            value={endDate}
-            onChange={handleEndChange}
-            aria-label="Data final do relatório"
-          />
-        </div>
-
-        {departamentos.length > 0 && (
-          <div className="filter-dept-wrapper">
-            <label>Departamentos</label>
-            <div className="dept-chips">
-              <button
-                className={`dept-chip all-chip ${allSelected ? 'selected' : ''}`}
-                onClick={selectAll}
-                aria-pressed={allSelected}
-              >
-                Todos
-              </button>
-              {departamentos.map((dep) => (
-                <button
-                  key={dep.id}
-                  className={`dept-chip ${selectedDepts.includes(dep.nome) ? 'selected' : ''}`}
-                  onClick={() => toggleDepartamento(dep.nome)}
-                  aria-pressed={selectedDepts.includes(dep.nome)}
-                >
-                  {dep.nome}
-                </button>
-              ))}
+            <div className="filter-section-col">
+              <div className="filter-section-header">
+                <IconDepartamento />
+                <h3>Departamentos</h3>
+                <span className="dept-counter">
+                  {selectedDeptCount}/{totalDeptCount}
+                </span>
+              </div>
+              <div className="filter-dept-wrapper">
+                <div className="dept-chips">
+                  <button
+                    className={`dept-chip all-chip ${allSelected ? 'selected' : ''}`}
+                    onClick={selectAll}
+                    aria-pressed={allSelected}
+                  >
+                    Todos
+                  </button>
+                  {departamentos.map((dep) => (
+                    <button
+                      key={dep.id}
+                      className={`dept-chip ${selectedDepts.includes(dep.nome) ? 'selected' : ''}`}
+                      onClick={() => toggleDepartamento(dep.nome)}
+                      aria-pressed={selectedDepts.includes(dep.nome)}
+                    >
+                      {dep.nome}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-        )}
 
-        <div className="filter-group" style={{ alignSelf: 'flex-end' }}>
-          <button
-            className="btn-primary"
-            onClick={loadReport}
-            disabled={loading || !isDateRangeValid}
-          >
-            {loading ? <><span className="btn-spinner" /> Carregando...</> : 'Gerar Relatório'}
-          </button>
-          {isDateRangeValid && diasSelecionados && (
-            <span className="dias-hint" style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
-              {diasSelecionados} no período
-            </span>
-          )}
-          {!isDateRangeValid && (
-            <span className="date-error">Data final deve ser posterior à inicial</span>
-          )}
+          <div className="filter-actions-bar">
+            <button
+              className="btn-secondary"
+              onClick={handleResetFilters}
+              title="Limpar todos os filtros"
+            >
+              Resetar Filtros
+            </button>
+            {isDateRangeValid && diasSelecionados && (
+              <span className="dias-hint">
+                {diasSelecionados} no período
+              </span>
+            )}
+            {!isDateRangeValid && (
+              <span className="date-error">Data final deve ser posterior à inicial</span>
+            )}
+            <button
+              className="btn-primary"
+              onClick={loadReport}
+              disabled={loading || !isDateRangeValid}
+            >
+              {loading ? <><span className="btn-spinner" /> Carregando...</> : 'Gerar Relatório'}
+            </button>
+          </div>
         </div>
-      </section>
+      </div>
 
       {showSkeleton && (
         <div className="reports-loading">

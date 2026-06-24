@@ -1,0 +1,272 @@
+/* ============================================
+   Material Design 3 - Card Components
+   ============================================ */
+
+/* Base Card */
+.md-card {
+  position: relative;
+  border-radius: var(--md-sys-shape-medium);
+  padding: 16px;
+  transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+}
+
+/* Card Variants */
+
+/* 1. Elevated Card (default - surface color + elevation) */
+.md-card--elevated {
+  background-color: var(--md-sys-color-surface-container-low);
+  box-shadow: var(--md-sys-elevation-1);
+}
+
+.md-card--elevated:hover {
+  box-shadow: var(--md-sys-elevation-2);
+}
+
+/* 2. Filled Card (filled surface color) */
+.md-card--filled {
+  background-color: var(--md-sys-color-surface-container-highest);
+  box-shadow: none;
+}
+
+.md-card--filled:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-surface-container-highest) 95%, var(--md-sys-color-on-surface));
+}
+
+/* 3. Outlined Card (surface + outline border) */
+.md-card--outlined {
+  background-color: var(--md-sys-color-surface);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  box-shadow: none;
+}
+
+.md-card--outlined:hover {
+  border-color: var(--md-sys-color-outline);
+}
+
+/* ========================================
+   CLICKABLE CARD
+   ======================================== */
+
+.md-card--clickable {
+  cursor: pointer;
+}
+
+.md-card--clickable:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+.md-card--clickable:active {
+  transform: scale(0.99);
+}
+
+/* ========================================
+   CARD SECTIONS
+   ======================================== */
+
+.md-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.md-card__header-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.md-card__title {
+  font: var(--md-sys-typescale-title-medium);
+  color: var(--md-sys-color-on-surface);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.md-card__subtitle {
+  font: var(--md-sys-typescale-body-medium);
+  color: var(--md-sys-color-on-surface-variant);
+  margin: 4px 0 0;
+  line-height: 1.4;
+}
+
+.md-card__icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.md-card__media {
+  margin: -16px -16px 16px;
+  overflow: hidden;
+}
+
+.md-card__media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.md-card__content {
+  margin: 0;
+}
+
+.md-card__content p {
+  font: var(--md-sys-typescale-body-medium);
+  color: var(--md-sys-color-on-surface-variant);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.md-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.md-card__actions--right {
+  justify-content: flex-end;
+}
+
+.md-card__actions--full {
+  justify-content: stretch;
+}
+
+.md-card__actions--full .md-button {
+  flex: 1;
+}
+
+/* ========================================
+   KPI CARD (específico do projeto)
+   ======================================== */
+
+.md-card--kpi {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.md-card--kpi::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--md-sys-color-primary);
+  border-radius: var(--md-sys-shape-medium) var(--md-sys-shape-medium) 0 0;
+}
+
+.md-card--kpi.md-card--positive::before {
+  background: var(--md-sys-color-status-positive);
+}
+
+.md-card--kpi.md-card--negative::before {
+  background: var(--md-sys-color-status-negative);
+}
+
+.md-card__kpi-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: var(--md-sys-typescale-label-medium);
+  color: var(--md-sys-color-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.md-card__kpi-label svg {
+  width: 16px;
+  height: 16px;
+}
+
+.md-card__kpi-value {
+  font: var(--md-sys-typescale-display-small);
+  color: var(--md-sys-color-on-surface);
+  font-variant-numeric: tabular-nums;
+}
+
+.md-card--positive .md-card__kpi-value {
+  color: var(--md-sys-color-status-positive);
+}
+
+.md-card--negative .md-card__kpi-value {
+  color: var(--md-sys-color-status-negative);
+}
+
+.md-card__kpi-sub {
+  font: var(--md-sys-typescale-body-small);
+  color: var(--md-sys-color-on-surface-variant);
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ========================================
+   STATS CARD (resumo)
+   ======================================== */
+
+.md-card--stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+}
+
+.md-card__stats-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--md-sys-shape-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.md-card__stats-icon--primary {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.md-card__stats-icon--secondary {
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.md-card__stats-icon--tertiary {
+  background-color: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+}
+
+.md-card__stats-icon--error {
+  background-color: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error-container);
+}
+
+.md-card__stats-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.md-card__stats-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.md-card__stats-label {
+  font: var(--md-sys-typescale-label-medium);
+  color: var(--md-sys-color-on-surface-variant);
+  margin-bottom: 2px;
+}
+
+.md-card__stats-value {
+  font: var(--md-sys-typescale-title-large);
+  color: var(--md-sys-color-on-surface);
+  font-variant-numeric: tabular-nums;
+}

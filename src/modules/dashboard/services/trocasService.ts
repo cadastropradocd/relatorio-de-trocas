@@ -11,6 +11,7 @@ import {
   limit as firestoreLimit,
   startAfter,
   serverTimestamp,
+  runTransaction,
 } from 'firebase/firestore';
 import { db } from '../../../shared/services/firebase';
 import type { TrocasData, Setor } from '../../../shared/types/trocas';
@@ -18,13 +19,7 @@ import { getDepartamentosAtivos } from '../../departamentos/services/departament
 import { convertFirestoreTimestamp } from '../../../shared/utils/auth';
 import { logger } from '../../../shared/utils/logger';
 import { calculateSetorStats } from '../../../shared/utils/setores';
-
-const calculateTotals = (setores: Setor[]): { total_realizado: number; total_meta: number; total_diferenca: number } => {
-  const total_realizado = setores.reduce((sum, s) => sum + s.realizado, 0);
-  const total_meta = setores.reduce((sum, s) => sum + s.meta, 0);
-  const total_diferenca = total_realizado - total_meta;
-  return { total_realizado, total_meta, total_diferenca };
-};
+import { calculateTotals } from '../../../shared/utils/calculations';
 
 const TROCAS_COLLECTION = 'historico';
 
@@ -348,13 +343,53 @@ export const getOrCreateTrocas = async (
 ): Promise<TrocasData | null> => {
   logger.info('trocasService', `getOrCreateTrocas: ${date}`, { userId });
 
-  const existingData = await getTrocasByDate(date);
+  const docId = `${userId}_${date}`;
+  const docRef = doc(db, TROCAS_COLLECTION, docId);
 
-  if (existingData) {
-    logger.info('trocasService', 'Retornando dados existentes');
-    return existingData;
+  const departamentos = await getDepartamentosAtivos();
+  if (departamentos.length === 0) {
+    logger.warn('trocasService', 'Nenhum departamento ativo encontrado');
+    return null;
   }
 
-  logger.info('trocasService', 'Dados não encontrados, criando novos...');
-  return createTrocas(date, userId);
+  const setoresBase = departamentos.map((d) => ({
+    categoria: d.nome,
+    realizado: 0,
+    meta: d.meta_mensal,
+  }));
+
+  return runTransaction(db, async (transaction) => {
+    const snap = await transaction.get(docRef);
+
+    if (snap.exists()) {
+      logger.info('trocasService', 'Retornando dados existentes (transação)');
+      return docToTrocasData(snap);
+    }
+
+    logger.info('trocasService', 'Dados não encontrados, criando novos (transação)...');
+
+    const newSetores = setoresBase.map((s) => calculateSetorStats(s));
+    const totals = calculateTotals(newSetores);
+
+    const trocasData = {
+      data: date,
+      setores: sanitizeSetoresForFirestore(newSetores),
+      ...totals,
+      usuario_id: userId,
+      criado_em: serverTimestamp(),
+      atualizado_em: serverTimestamp(),
+    };
+
+    transaction.set(docRef, trocasData);
+
+    return {
+      id: docRef.id,
+      data: date,
+      setores: newSetores,
+      ...totals,
+      usuario_id: userId,
+      criado_em: new Date().toISOString(),
+      atualizado_em: new Date().toISOString(),
+    };
+  });
 };

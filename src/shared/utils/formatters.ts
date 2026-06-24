@@ -121,9 +121,12 @@ export const normalizarTexto = (valor: string | null | undefined): string => {
 
 /**
  * Retorna classe CSS baseada no status da diferença
+ * Regra: >0 = negativo (ruim), =0 = neutro (limite), <0 = positivo (bom)
  * @param diferenca - Valor da diferença
- * @returns Classe CSS ('status-negativo' ou 'status-positivo')
+ * @returns Classe CSS ('status-negativo', 'status-neutro' ou 'status-positivo')
  */
 export const classeStatus = (diferenca: number): string => {
-  return diferenca > 0 ? 'status-negativo' : 'status-positivo';
+  if (diferenca > 0) return 'status-negativo';
+  if (diferenca === 0) return 'status-neutro';
+  return 'status-positivo';
 };

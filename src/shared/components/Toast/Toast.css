@@ -32,25 +32,25 @@
 
 .toast-success {
   border-left: 4px solid var(--ok);
-  background: linear-gradient(135deg, var(--bg-card) 85%, rgba(16, 185, 129, 0.08));
+  background: linear-gradient(135deg, var(--bg-card) 85%, color-mix(in srgb, var(--md-sys-color-status-positive) 8%, transparent));
 }
 .toast-success .toast-icon { color: var(--ok); }
 
 .toast-error {
   border-left: 4px solid var(--danger);
-  background: linear-gradient(135deg, var(--bg-card) 85%, rgba(239, 68, 68, 0.08));
+  background: linear-gradient(135deg, var(--bg-card) 85%, color-mix(in srgb, var(--md-sys-color-error) 8%, transparent));
 }
 .toast-error .toast-icon { color: var(--danger); }
 
 .toast-warning {
   border-left: 4px solid var(--accent);
-  background: linear-gradient(135deg, var(--bg-card) 85%, rgba(251, 191, 36, 0.08));
+  background: linear-gradient(135deg, var(--bg-card) 85%, color-mix(in srgb, var(--accent) 8%, transparent));
 }
 .toast-warning .toast-icon { color: var(--accent); }
 
 .toast-info {
   border-left: 4px solid var(--brand);
-  background: linear-gradient(135deg, var(--bg-card) 85%, rgba(59, 130, 246, 0.08));
+  background: linear-gradient(135deg, var(--bg-card) 85%, color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent));
 }
 .toast-info .toast-icon { color: var(--brand); }
 

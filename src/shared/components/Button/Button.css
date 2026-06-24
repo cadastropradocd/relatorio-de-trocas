@@ -1,0 +1,293 @@
+/* ============================================
+   Material Design 3 - Button Components
+   ============================================ */
+
+/* Base Button */
+.md-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  border: none;
+  cursor: pointer;
+  font-family: var(--md-font-ui);
+  font-weight: 500;
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  overflow: hidden;
+  transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+}
+
+/* Button Height Tokens */
+.md-button--small {
+  height: 32px;
+  padding: 0 16px;
+  border-radius: var(--md-sys-shape-full);
+  font-size: 0.75rem;
+}
+
+.md-button--medium {
+  height: 40px;
+  padding: 0 24px;
+  border-radius: var(--md-sys-shape-full);
+}
+
+.md-button--large {
+  height: 56px;
+  padding: 0 32px;
+  border-radius: var(--md-sys-shape-large);
+  font-size: 1rem;
+}
+
+/* ========================================
+   VARIANTS
+   ======================================== */
+
+/* 1. Filled Button (Primary action) */
+.md-button--filled {
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+.md-button--filled:hover {
+  background-color: var(--md-sys-color-primary-hover);
+  box-shadow: var(--md-sys-elevation-1);
+}
+
+.md-button--filled:active {
+  box-shadow: none;
+  transform: scale(0.98);
+}
+
+.md-button--filled:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+.md-button--filled:disabled {
+  background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* 2. Filled Tonal Button (Secondary action) */
+.md-button--tonal {
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.md-button--tonal:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-secondary-container) 92%, var(--md-sys-color-on-secondary-container));
+  box-shadow: var(--md-sys-elevation-1);
+}
+
+.md-button--tonal:active {
+  box-shadow: none;
+  transform: scale(0.98);
+}
+
+.md-button--tonal:focus-visible {
+  outline: 2px solid var(--md-sys-color-secondary);
+  outline-offset: 2px;
+}
+
+.md-button--tonal:disabled {
+  background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* 3. Outlined Button (Medium emphasis) */
+.md-button--outlined {
+  background-color: transparent;
+  color: var(--md-sys-color-primary);
+  border: 1px solid var(--md-sys-color-outline);
+}
+
+.md-button--outlined:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
+  border-color: var(--md-sys-color-primary);
+}
+
+.md-button--outlined:active {
+  transform: scale(0.98);
+}
+
+.md-button--outlined:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+.md-button--outlined:disabled {
+  background-color: transparent;
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
+  border-color: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
+  cursor: not-allowed;
+}
+
+/* 4. Text Button (Lowest emphasis) */
+.md-button--text {
+  background-color: transparent;
+  color: var(--md-sys-color-primary);
+  padding: 0 12px;
+}
+
+.md-button--text:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
+}
+
+.md-button--text:active {
+  transform: scale(0.98);
+}
+
+.md-button--text:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+.md-button--text:disabled {
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
+  cursor: not-allowed;
+}
+
+/* 5. Icon Button */
+.md-button--icon {
+  background-color: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  padding: 0;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: var(--md-sys-shape-full);
+}
+
+.md-button--icon:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
+}
+
+.md-button--icon:active {
+  transform: scale(0.92);
+}
+
+.md-button--icon:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+.md-button--icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* 6. FAB (Floating Action Button) */
+.md-button--fab {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  border-radius: var(--md-sys-shape-large);
+  box-shadow: var(--md-sys-elevation-3);
+  padding: 0;
+  min-width: 56px;
+  min-height: 56px;
+}
+
+.md-button--fab:hover {
+  box-shadow: var(--md-sys-elevation-4);
+}
+
+.md-button--fab:active {
+  box-shadow: var(--md-sys-elevation-2);
+  transform: scale(0.96);
+}
+
+.md-button--fab svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* ========================================
+   DANGER VARIANTS
+   ======================================== */
+
+.md-button--danger.md-button--filled {
+  background-color: var(--md-sys-color-error);
+  color: var(--md-sys-color-on-error);
+}
+
+.md-button--danger.md-button--filled:hover {
+  background-color: var(--md-sys-color-error-hover);
+}
+
+.md-button--danger.md-button--outlined {
+  background-color: transparent;
+  color: var(--md-sys-color-error);
+  border-color: var(--md-sys-color-error);
+}
+
+.md-button--danger.md-button--outlined:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-error) 8%, transparent);
+  border-color: var(--md-sys-color-error-hover);
+}
+
+/* ========================================
+   LOADING STATE
+   ======================================== */
+
+.md-button--loading {
+  color: transparent;
+  pointer-events: none;
+}
+
+.md-button--loading::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: md-button-spin 0.8s linear infinite;
+}
+
+.md-button--filled.md-button--loading::before,
+.md-button--tonal.md-button--loading::before,
+.md-button--danger.md-button--filled.md-button--loading::before {
+  border-color: var(--md-sys-color-on-primary);
+  border-top-color: transparent;
+}
+
+.md-button--outlined.md-button--loading::before,
+.md-button--text.md-button--loading::before {
+  border-color: var(--md-sys-color-primary);
+  border-top-color: transparent;
+}
+
+@keyframes md-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========================================
+   ICON ALIGNMENT
+   ======================================== */
+
+.md-button svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.md-button--icon-start svg {
+  margin-right: -4px;
+}
+
+.md-button--icon-end svg {
+  margin-left: -4px;
+}

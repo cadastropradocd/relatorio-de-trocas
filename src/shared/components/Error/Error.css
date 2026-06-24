@@ -24,7 +24,7 @@
   margin-top: 1rem;
   padding: 0.75rem 1.5rem;
   background: var(--danger);
-  color: white;
+  color: var(--md-sys-color-on-error);
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -35,9 +35,9 @@
 }
 
 .error-btn:hover {
-  background: #dc2626;
+  background: color-mix(in srgb, var(--danger) 85%, #000);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--md-sys-color-error) 40%, transparent);
 }
 
 .error-btn:active {

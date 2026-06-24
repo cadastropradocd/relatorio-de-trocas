@@ -1,0 +1,248 @@
+/* DepartmentCard - Professional */
+.department-card {
+  background: linear-gradient(145deg, var(--md-sys-color-surface-container) 0%, var(--md-sys-color-surface-container-low) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.department-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--brand) 0%, color-mix(in srgb, var(--brand) 40%, transparent) 100%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.department-card:hover {
+  box-shadow: var(--shadow-card);
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--brand) 30%, var(--border));
+}
+
+.department-card:hover::before {
+  opacity: 1;
+}
+
+/* Melhor/Critico */
+.department-card.dept-melhor {
+  border-color: color-mix(in srgb, var(--ok) 25%, var(--border));
+}
+
+.department-card.dept-melhor::before {
+  opacity: 1;
+  background: linear-gradient(90deg, var(--ok) 0%, color-mix(in srgb, var(--ok) 40%, transparent) 100%);
+}
+
+.department-card.dept-critico {
+  border-color: color-mix(in srgb, var(--danger) 25%, var(--border));
+}
+
+.department-card.dept-critico::before {
+  opacity: 1;
+  background: linear-gradient(90deg, var(--danger) 0%, color-mix(in srgb, var(--danger) 40%, transparent) 100%);
+}
+
+/* Header */
+.dept-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dept-name {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.dept-badge {
+  padding: 0.2rem 0.55rem;
+  border-radius: 20px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-melhor {
+  background: var(--ok-bg);
+  color: var(--ok);
+  border: 1px solid color-mix(in srgb, var(--ok) 25%, transparent);
+}
+
+.badge-critico {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 25%, transparent);
+}
+
+/* Fields */
+.dept-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dept-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.35rem 0;
+}
+
+.dept-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  font-weight: 600;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.dept-input {
+  width: auto;
+  min-width: 0;
+  flex: 1;
+  height: auto;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  transition: all 150ms ease;
+  cursor: default;
+}
+
+.dept-input:not(:disabled):hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 5%, transparent);
+  border-color: var(--border);
+  border-radius: var(--radius-sm);
+  cursor: text;
+}
+
+.dept-input:focus {
+  outline: none;
+  background: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
+  border-color: var(--brand);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);
+  cursor: text;
+}
+
+.dept-input:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.dept-input.cell-ok {
+  border-color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 10%, transparent);
+}
+
+.dept-input.cell-error {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+}
+
+/* Footer */
+.dept-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+
+.dept-status-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.dept-status-row:last-child {
+  margin-left: auto;
+}
+
+.dept-diferenca {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.dept-seta {
+  font-size: 0.8em;
+  margin-left: 0.15rem;
+}
+
+.dept-percentual {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+/* Status colors */
+.dept-diferenca.status-negativo,
+.dept-percentual.status-negativo {
+  color: var(--danger-light);
+}
+
+.dept-diferenca.status-positivo,
+.dept-percentual.status-positivo {
+  color: var(--ok-light);
+}
+
+.dept-diferenca.status-neutro,
+.dept-percentual.status-neutro {
+  color: var(--text-muted);
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .department-card {
+    padding: 1rem;
+  }
+
+  .dept-name {
+    font-size: 0.85rem;
+  }
+
+  .dept-input {
+    font-size: 0.95rem;
+  }
+
+  .dept-diferenca {
+    font-size: 0.9rem;
+  }
+
+  .dept-percentual {
+    font-size: 0.85rem;
+  }
+}

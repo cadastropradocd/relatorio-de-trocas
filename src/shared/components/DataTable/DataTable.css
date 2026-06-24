@@ -45,11 +45,11 @@ th:first-child {
 }
 
 .sortable:hover {
-  background: rgba(59, 130, 246, 0.15);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 15%, transparent);
 }
 
 .sortable.sort-active {
-  background: rgba(59, 130, 246, 0.25);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 25%, transparent);
   color: var(--brand);
 }
 
@@ -67,7 +67,7 @@ tbody tr:nth-child(even) {
 }
 
 tbody tr:hover {
-  background: rgba(59, 130, 246, 0.08);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
 }
 
 /* Destaque linha melhor/crítico */
@@ -150,12 +150,14 @@ td:nth-child(5) {
   color: var(--ok);
   background: var(--ok-bg);
   border-color: var(--ok);
+  font-weight: 700;
 }
 
 .badge-critico {
   color: var(--danger);
   background: var(--danger-bg);
   border-color: var(--danger);
+  font-weight: 700;
 }
 
 /* Status Colors */
@@ -166,6 +168,11 @@ td:nth-child(5) {
 
 .status-negativo {
   color: var(--danger-light);
+  font-weight: 700;
+}
+
+.status-neutro {
+  color: var(--accent);
   font-weight: 700;
 }
 
@@ -195,16 +202,16 @@ td:nth-child(5) {
 .cell-input:focus {
   outline: none;
   border-color: var(--brand);
-  background: rgba(59, 130, 246, 0.15);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 15%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--md-sys-color-primary) 20%, transparent);
 }
 
 .cell-ok {
   border-color: var(--ok);
-  background: rgba(16, 185, 129, 0.15);
+  background: color-mix(in srgb, var(--md-sys-color-status-positive) 15%, transparent);
 }
 
 .cell-error {
   border-color: var(--danger);
-  background: rgba(239, 68, 68, 0.15);
+  background: color-mix(in srgb, var(--md-sys-color-error) 15%, transparent);
 }

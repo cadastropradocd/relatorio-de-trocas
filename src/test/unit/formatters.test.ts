@@ -164,9 +164,12 @@ describe('formatters', () => {
       expect(classeStatus(0.1)).toBe('status-negativo');
     });
 
-    it('deve retornar "status-positivo" para valores negativos ou zero', () => {
+    it('deve retornar "status-neutro" para valor zero', () => {
+      expect(classeStatus(0)).toBe('status-neutro');
+    });
+
+    it('deve retornar "status-positivo" para valores negativos', () => {
       expect(classeStatus(-10)).toBe('status-positivo');
-      expect(classeStatus(0)).toBe('status-positivo');
       expect(classeStatus(-0.1)).toBe('status-positivo');
     });
   });

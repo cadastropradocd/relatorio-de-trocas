@@ -6,23 +6,16 @@ import { useToast } from '../../../app/providers/ToastProvider';
 import { useAuth } from '../../../app/providers/AuthProvider';
 import { Header } from '../../../shared/components/Header';
 import { KPICard } from '../../../shared/components/KPICard';
-import { DataTable } from '../../../shared/components/DataTable';
-import { SkeletonKPI, SkeletonTable } from '../../../shared/components/Skeleton';
+import { DepartmentCard } from '../../../shared/components/DepartmentCard';
+import { SkeletonKPI } from '../../../shared/components/Skeleton';
 import { IconTotal, IconMeta, IconDiferenca } from '../../../shared/components/Icons';
 import { usePullToRefresh } from '../../../shared/hooks/usePullToRefresh';
-import type { TableColumn, KPIData } from '../../../shared/types/trocas';
+import type { KPIData } from '../../../shared/types/trocas';
 import { formatBRL, formatarStatusMetaTotal, formatarDiferenca } from '../../../shared/utils/formatters';
+import { calculateTotals } from '../../../shared/utils/calculations';
 import './Dashboard.css';
 
-const COLUMNS: TableColumn[] = [
-  { key: 'categoria', header: 'SETOR', sortable: true, align: 'left' },
-  { key: 'realizado', header: 'REALIZADO', sortable: true, align: 'right' },
-  { key: 'meta', header: 'META', sortable: true, align: 'right' },
-  { key: 'diferenca', header: 'DIFERENÇA', sortable: true, align: 'right' },
-  { key: 'status', header: 'STATUS', sortable: true, align: 'right' },
-];
-
-export const Dashboard: React.FC = () => {
+export const Dashboard = () => {
   const dashboardRef = useRef<HTMLDivElement>(null);
   const { addToast } = useToast();
   const { user } = useAuth();
@@ -75,33 +68,31 @@ export const Dashboard: React.FC = () => {
       ];
     }
 
-    const totalRealizado = setoresAtuais.reduce((sum, s) => sum + s.realizado, 0);
-    const totalMeta = setoresAtuais.reduce((sum, s) => sum + s.meta, 0);
-    const totalDiferenca = totalRealizado - totalMeta;
+    const { total_realizado, total_meta, total_diferenca } = calculateTotals(setoresAtuais);
 
     return [
       {
         label: 'TOTAL REALIZADO',
-        value: totalRealizado,
-        formattedValue: formatBRL(totalRealizado),
+        value: total_realizado,
+        formattedValue: formatBRL(total_realizado),
         icon: <IconTotal />,
         tooltip: 'Soma de todos os valores realizados no período',
       },
       {
         label: 'META TOTAL',
-        value: totalMeta,
-        formattedValue: formatBRL(totalMeta),
+        value: total_meta,
+        formattedValue: formatBRL(total_meta),
         icon: <IconMeta />,
         tooltip: 'Soma de todas as metas do período',
       },
       {
         label: 'DIFERENÇA TOTAL',
-        value: totalDiferenca,
-        formattedValue: formatarDiferenca(totalDiferenca),
-        subValue: formatarStatusMetaTotal(totalRealizado, totalMeta),
+        value: total_diferenca,
+        formattedValue: formatarDiferenca(total_diferenca),
+        subValue: formatarStatusMetaTotal(total_realizado, total_meta),
         icon: <IconDiferenca />,
         tooltip: 'Diferença entre realizado e meta',
-        status: totalDiferenca > 0 ? 'negativo' : 'positivo',
+        status: total_diferenca > 0 ? 'negativo' : 'positivo',
       },
     ];
   }, [setoresAtuais]);
@@ -182,7 +173,11 @@ export const Dashboard: React.FC = () => {
         <section className="content-grid">
           <div className="card tabela-card">
             <h2>DETALHAMENTO POR SETOR</h2>
-            <SkeletonTable />
+            <div className="department-grid skeleton-grid">
+              <div className="skeleton-card" />
+              <div className="skeleton-card" />
+              <div className="skeleton-card" />
+            </div>
           </div>
         </section>
       </div>
@@ -247,14 +242,18 @@ export const Dashboard: React.FC = () => {
         <section className="content-grid">
           <div className="card tabela-card">
             <h2>DETALHAMENTO POR SETOR</h2>
-            <DataTable
-              data={setoresAtuais}
-              columns={COLUMNS}
-              onEdit={handleEdit}
-              melhorSetor={melhor}
-              setorCritico={critico}
-              readonly={user?.role !== 'admin'}
-            />
+            <div className="department-grid">
+              {setoresAtuais.map((setor) => (
+                <DepartmentCard
+                  key={setor.id}
+                  setor={setor}
+                  isMelhor={setor.categoria === melhor}
+                  isCritico={setor.categoria === critico}
+                  readonly={user?.role !== 'admin'}
+                  onEdit={handleEdit}
+                />
+              ))}
+            </div>
           </div>
         </section>
       ) : (

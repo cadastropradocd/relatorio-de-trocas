@@ -1,171 +1,436 @@
 /* ============================================
-   Shared Styles - Design System
+   Shared Styles - Material Design 3
    ============================================ */
 
-/* Buttons */
+/* ========================================
+   BUTTONS (Legacy - compat com .btn-*)
+   ======================================== */
+
+/* Primary Button -> MD3 Filled */
 .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  padding: 0.6rem 1.2rem;
-  background: var(--brand);
-  color: #ffffff;
+  gap: 8px;
+  height: 40px;
+  padding: 0 24px;
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
   border: none;
-  border-radius: var(--radius-sm);
-  font-size: 0.85rem;
-  font-weight: 700;
-  font-family: var(--font);
+  border-radius: var(--md-sys-shape-full);
+  font: var(--md-sys-typescale-label-large);
   cursor: pointer;
-  transition: all var(--transition);
+  transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
   white-space: nowrap;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  text-decoration: none;
 }
 
 .btn-primary:hover {
-  background: #2563eb;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  background: var(--md-sys-color-primary-hover);
+  box-shadow: var(--md-sys-elevation-1);
 }
 
 .btn-primary:active {
-  transform: translateY(0) scale(0.97);
+  box-shadow: none;
+  transform: scale(0.98);
 }
 
 .btn-primary:disabled {
-  opacity: 0.6;
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
 
+/* Secondary Button -> MD3 Tonal */
 .btn-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  padding: 0.6rem 1.2rem;
-  background: transparent;
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 0.85rem;
-  font-weight: 600;
-  font-family: var(--font);
+  gap: 8px;
+  height: 40px;
+  padding: 0 24px;
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  border: none;
+  border-radius: var(--md-sys-shape-full);
+  font: var(--md-sys-typescale-label-large);
   cursor: pointer;
-  transition: all var(--transition);
+  transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
 }
 
 .btn-secondary:hover {
-  border-color: var(--text-muted);
-  color: var(--text);
+  background: color-mix(in srgb, var(--md-sys-color-secondary-container) 92%, var(--md-sys-color-on-secondary-container));
+  box-shadow: var(--md-sys-elevation-1);
 }
 
-/* Form Groups */
+.btn-secondary:active {
+  box-shadow: none;
+  transform: scale(0.98);
+}
+
+.btn-secondary:disabled {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
+  cursor: not-allowed;
+}
+
+/* ========================================
+   FORM GROUPS -> MD3 TextField
+   ======================================== */
+
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 16px;
 }
 
 .form-group label {
   display: block;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  margin-bottom: 0.4rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  font: var(--md-sys-typescale-label-large);
+  color: var(--md-sys-color-on-surface-variant);
+  margin-bottom: 8px;
 }
 
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 0.6rem 0.8rem;
-  background: var(--bg-page);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  font-size: 0.9rem;
-  font-family: var(--font);
-  transition: border-color 0.2s;
+  height: 56px;
+  padding: 24px 16px 8px;
+  background: var(--md-sys-color-surface-container-highest);
+  border: none;
+  border-radius: var(--md-sys-shape-extra-small);
+  color: var(--md-sys-color-on-surface);
+  font: var(--md-sys-typescale-body-large);
+  transition: all var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+}
+
+.form-group input:hover,
+.form-group select:hover {
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-highest) 95%, var(--md-sys-color-on-surface));
 }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: var(--brand);
+  background: var(--md-sys-color-surface-container-highest);
+}
+
+/* Floating Label */
+.form-group label {
+  position: relative;
+  display: block;
+  font: var(--md-sys-typescale-body-small);
+  color: var(--md-sys-color-primary);
+  margin-bottom: 8px;
+}
+
+.form-group input::placeholder {
+  color: transparent;
+}
+
+.form-group input:not(:placeholder-shown) ~ label,
+.form-group input:focus ~ label {
+  /* Label floats up when input has value or focus */
 }
 
 .field-error {
   display: block;
-  color: var(--danger);
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
+  color: var(--md-sys-color-error);
+  font: var(--md-sys-typescale-body-small);
+  margin-top: 4px;
 }
 
-/* Action Buttons (small) */
+/* ========================================
+   ACTION BUTTONS (small) -> MD3 Icon Button
+   ======================================== */
+
 .action-btn-sm {
   width: 32px;
   height: 32px;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--md-sys-shape-full);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
   background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
 }
 
 .action-btn-sm svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 .action-btn-sm.edit {
-  color: var(--brand);
+  color: var(--md-sys-color-primary);
 }
 
 .action-btn-sm.edit:hover {
-  background: rgba(59, 130, 246, 0.1);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
 }
 
 .action-btn-sm.delete {
-  color: var(--danger);
+  color: var(--md-sys-color-error);
 }
 
 .action-btn-sm.delete:hover {
-  background: var(--danger-bg);
+  background: color-mix(in srgb, var(--md-sys-color-error) 8%, transparent);
 }
 
 .actions-cell {
   display: flex;
-  gap: 0.5rem;
+  gap: 4px;
 }
 
-/* Status Colors - Standardized */
+/* ========================================
+   STATUS COLORS -> MD3 Status
+   ======================================== */
+
 .status-positivo,
 .positive {
-  color: var(--ok-light);
+  color: var(--md-sys-color-status-positive);
 }
 
 .status-negativo,
 .negative {
-  color: var(--danger-light);
+  color: var(--md-sys-color-status-negative);
 }
 
-/* Empty States */
+.status-neutro,
+.neutral {
+  color: var(--md-sys-color-status-neutral);
+}
+
+/* ========================================
+   EMPTY STATES
+   ======================================== */
+
 .empty-row {
   text-align: center;
-  color: var(--text-muted);
-  padding: 2rem !important;
+  color: var(--md-sys-color-on-surface-variant);
+  padding: 32px !important;
 }
 
-/* Title Bar (decorative accent) */
+.empty-state {
+  text-align: center;
+  padding: 48px 32px;
+}
+
+.empty-state h2 {
+  font: var(--md-sys-typescale-headline-small);
+  color: var(--md-sys-color-on-surface);
+  margin: 0 0 8px;
+}
+
+.empty-state p {
+  font: var(--md-sys-typescale-body-large);
+  color: var(--md-sys-color-on-surface-variant);
+  margin: 0 0 16px;
+}
+
+.empty-sub {
+  font: var(--md-sys-typescale-body-medium) !important;
+  color: var(--md-sys-color-on-surface-variant) !important;
+  margin-bottom: 24px !important;
+}
+
+.empty-hint {
+  font: var(--md-sys-typescale-body-small) !important;
+  color: var(--md-sys-color-on-surface-variant) !important;
+}
+
+/* ========================================
+   TITLE BAR (decorative accent) -> MD3
+   ======================================== */
+
 .title-bar {
   display: inline-block;
-  width: 6px;
+  width: 4px;
   height: 1.1em;
-  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
-  border-radius: 3px;
+  background: var(--md-sys-color-primary);
+  border-radius: var(--md-sys-shape-full);
+  margin-right: 12px;
+}
+
+/* ========================================
+   CARD (legacy .card class)
+   ======================================== */
+
+.card {
+  background: var(--md-sys-color-surface-container-low);
+  border-radius: var(--md-sys-shape-medium);
+  padding: 24px;
+  box-shadow: var(--md-sys-elevation-1);
+  transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+}
+
+.card:hover {
+  box-shadow: var(--md-sys-elevation-2);
+}
+
+.card h2 {
+  font: var(--md-sys-typescale-title-medium);
+  color: var(--md-sys-color-on-surface);
+  margin: 0 0 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ========================================
+   BADGE -> MD3 Badge
+   ======================================== */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--md-sys-shape-full);
+  font: var(--md-sys-typescale-label-small);
+  font-weight: 600;
+}
+
+.badge--primary {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+.badge--secondary {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.badge--error {
+  background: var(--md-sys-color-error);
+  color: var(--md-sys-color-on-error);
+}
+
+.badge--positive {
+  background: var(--md-sys-color-status-positive-container);
+  color: var(--md-sys-color-status-positive);
+}
+
+.badge--negative {
+  background: var(--md-sys-color-status-negative-container);
+  color: var(--md-sys-color-status-negative);
+}
+
+/* ========================================
+   TOOLTIP -> MD3 Tooltip
+   ======================================== */
+
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 12px;
+  background: var(--md-sys-color-inverse-surface);
+  color: var(--md-sys-color-inverse-on-surface);
+  font: var(--md-sys-typescale-body-small);
+  border-radius: var(--md-sys-shape-extra-small);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+  z-index: 1000;
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+}
+
+/* ========================================
+   DIVIDER -> MD3 Divider
+   ======================================== */
+
+.divider {
+  height: 1px;
+  background: var(--md-sys-color-outline-variant);
+  margin: 16px 0;
+}
+
+.divider--inset {
+  margin-left: 16px;
+  margin-right: 16px;
+}
+
+/* ========================================
+   SCROLLBAR -> MD3
+   ======================================== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--md-sys-color-outline);
+}
+
+/* ========================================
+   ANIMATION KEYFRAMES -> MD3 Motion
+   ======================================== */
+
+@keyframes md-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes md-fade-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes md-fade-in-down {
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes md-scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes md-slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes md-slide-in-left {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes md-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

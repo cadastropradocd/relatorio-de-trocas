@@ -29,9 +29,18 @@ export interface UpdateUserData {
 
 const USUARIOS_COLLECTION = 'usuarios';
 
-const hashPassword = async (password: string): Promise<string> => {
+const SALT_LENGTH = 16;
+
+const generateSalt = (): string => {
+  const array = new Uint8Array(SALT_LENGTH);
+  crypto.getRandomValues(array);
+  return Array.from(array).map((b) => b.toString(16).padStart(2, '0')).join('');
+};
+
+const hashPassword = async (password: string, salt?: string): Promise<string> => {
   const encoder = new TextEncoder();
-  const data = encoder.encode(password);
+  const saltedPassword = salt ? salt + password : password;
+  const data = encoder.encode(saltedPassword);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -100,7 +109,8 @@ export const createUser = async (data: CreateUserData): Promise<User> => {
       throw new Error('Este nome de usuário já está cadastrado.');
     }
 
-    const passwordHash = await hashPassword(data.password);
+    const salt = generateSalt();
+    const passwordHash = await hashPassword(data.password, salt);
     const email = `${data.username.toLowerCase().trim()}@trocas.app`;
     const uid = crypto.randomUUID();
 
@@ -109,6 +119,7 @@ export const createUser = async (data: CreateUserData): Promise<User> => {
       email,
       name: data.name,
       password_hash: passwordHash,
+      salt,
       avatar_url: null,
       role: data.role,
       criado_em: new Date().toISOString(),

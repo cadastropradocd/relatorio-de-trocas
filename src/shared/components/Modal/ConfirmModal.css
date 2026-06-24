@@ -111,13 +111,13 @@
   transition: all var(--transition);
   white-space: nowrap;
   background: var(--danger);
-  color: white;
+  color: var(--md-sys-color-on-error);
   border: 1px solid var(--danger);
 }
 
 .btn-danger:hover:not(:disabled) {
-  background: #dc2626;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  background: color-mix(in srgb, var(--danger) 85%, #000);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--md-sys-color-error) 40%, transparent);
 }
 
 .btn-danger:disabled {

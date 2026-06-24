@@ -1,0 +1,223 @@
+/* ============================================
+   Material Design 3 - Chip Components
+   ============================================ */
+
+/* Base Chip */
+.md-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: var(--md-sys-shape-small);
+  font: var(--md-sys-typescale-label-large);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: all var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+  outline: none;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.md-chip:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+.md-chip:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+/* ========================================
+   VARIANTS
+   ======================================== */
+
+/* 1. Assist Chip (simple action) */
+.md-chip--assist {
+  background: var(--md-sys-color-surface-container-low);
+  border-color: var(--md-sys-color-outline);
+  color: var(--md-sys-color-on-surface);
+}
+
+.md-chip--assist:hover {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, var(--md-sys-color-surface-container-low));
+}
+
+.md-chip--assist:active {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, var(--md-sys-color-surface-container-low));
+}
+
+/* 2. Filter Chip (toggle selection) */
+.md-chip--filter {
+  background: var(--md-sys-color-surface-container-low);
+  border-color: var(--md-sys-color-outline);
+  color: var(--md-sys-color-on-surface);
+}
+
+.md-chip--filter:hover {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, var(--md-sys-color-surface-container-low));
+}
+
+.md-chip--filter.md-chip--selected {
+  background: var(--md-sys-color-secondary-container);
+  border-color: transparent;
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.md-chip--filter.md-chip--selected:hover {
+  background: color-mix(in srgb, var(--md-sys-color-secondary-container) 92%, var(--md-sys-color-on-secondary-container));
+}
+
+/* 3. Input Chip (removable) */
+.md-chip--input {
+  background: var(--md-sys-color-surface-container-low);
+  border-color: var(--md-sys-color-outline);
+  color: var(--md-sys-color-on-surface);
+  padding-right: 8px;
+}
+
+.md-chip--input:hover {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, var(--md-sys-color-surface-container-low));
+}
+
+/* 4. Suggestion Chip (suggestion action) */
+.md-chip--suggestion {
+  background: var(--md-sys-color-surface-container-low);
+  border-color: var(--md-sys-color-outline);
+  color: var(--md-sys-color-on-surface);
+}
+
+.md-chip--suggestion:hover {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, var(--md-sys-color-surface-container-low));
+}
+
+/* ========================================
+   STATUS COLORS
+   ======================================== */
+
+/* Positive/Bom */
+.md-chip--positive {
+  background: var(--md-sys-color-status-positive-container);
+  border-color: transparent;
+  color: var(--md-sys-color-status-positive);
+}
+
+/* Negative/Ruim */
+.md-chip--negative {
+  background: var(--md-sys-color-status-negative-container);
+  border-color: transparent;
+  color: var(--md-sys-color-status-negative);
+}
+
+/* Neutral */
+.md-chip--neutral {
+  background: var(--md-sys-color-surface-container);
+  border-color: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ========================================
+   CHIP ICONS
+   ======================================== */
+
+.md-chip__icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.md-chip__icon--leading {
+  margin-left: -4px;
+  margin-right: -4px;
+}
+
+.md-chip__icon--trailing {
+  margin-left: -4px;
+  margin-right: -4px;
+}
+
+/* ========================================
+   CHIP CLOSE BUTTON
+   ======================================== */
+
+.md-chip__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: -4px;
+  margin-right: -4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: currentColor;
+  cursor: pointer;
+  border-radius: var(--md-sys-shape-full);
+  transition: background var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+}
+
+.md-chip__close:hover {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.md-chip__close:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.md-chip__close svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ========================================
+   CHIP GROUP
+   ======================================== */
+
+.md-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ========================================
+   ELEVATED CHIP (optional)
+   ======================================== */
+
+.md-chip--elevated {
+  box-shadow: var(--md-sys-elevation-1);
+}
+
+.md-chip--elevated:hover {
+  box-shadow: var(--md-sys-elevation-2);
+}
+
+/* ========================================
+   SMALL CHIP
+   ======================================== */
+
+.md-chip--small {
+  height: 24px;
+  padding: 0 8px;
+  font: var(--md-sys-typescale-label-small);
+}
+
+.md-chip--small .md-chip__icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* ========================================
+   LARGE CHIP
+   ======================================== */
+
+.md-chip--large {
+  height: 40px;
+  padding: 0 20px;
+  font-size: 1rem;
+}

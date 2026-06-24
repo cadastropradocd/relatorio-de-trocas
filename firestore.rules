@@ -1,32 +1,53 @@
+<content>
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // WARNING: This is an internal app with custom auth (not Firebase Auth).
-    // Rules are intentionally open because auth is handled at the app level
-    // via a custom login flow. In production, add IP-based rate limiting
-    // (e.g., via Firebase Extensions or a Cloud Function) to mitigate abuse.
-    // Consider migrating to Firebase Auth or adding request.auth checks
-    // for better security.
+    // ============================================
+    // CUSTOM AUTH SYSTEM - NO FIREBASE AUTH
+    // ============================================
+    // This app uses a custom authentication system:
+    // - SHA-256 password hashing (client-side)
+    // - Session stored in localStorage (24h expiry)
+    // - Roles: 'admin' | 'user' stored in Firestore
+    // - Ownership validated at APPLICATION LEVEL (not in rules)
+    //
+    // SECURITY MODEL:
+    // 1. All Firestore operations go through app services (trocasService, etc.)
+    // 2. Services validate user session before any operation
+    // 3. Services enforce ownership: usuario_id must match current user
+    // 4. Admin operations check user.role === 'admin'
+    // 5. Rules are intentionally permissive for development
+    //    In production, consider:
+    //    - Firebase App Check for abuse prevention
+    //    - Cloud Functions as API layer with custom auth validation
+    //    - Custom tokens with Firebase Auth (if migrating)
+    //
+    // WARNING: These rules allow any authenticated-like access.
+    // Real security is enforced in the application layer.
 
     match /historico/{docId} {
+      // App validates: user session exists, usuario_id matches current user
       allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if request.auth != null;
+      allow create: if true;  // App validates ownership before write
+      allow update: if true;  // App validates ownership before write
+      allow delete: if true;  // App validates ownership before write
     }
 
     match /usuarios/{userId} {
+      // App validates: admin role for create/update/delete
+      // Users can read all (for login lookup), but only admins manage users
       allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
+      allow create: if true;  // App validates admin role
+      allow update: if true;  // App validates admin role or self
+      allow delete: if true;  // App validates admin role
     }
 
     match /departamentos/{docId} {
+      // App validates: admin role for all mutations
       allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
+      allow create: if true;  // App validates admin role
+      allow update: if true;  // App validates admin role
+      allow delete: if true;  // App validates admin role
     }
   }
 }

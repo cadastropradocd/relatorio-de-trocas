@@ -1,0 +1,287 @@
+/* ============================================
+   Material Design 3 - Text Field Components
+   ============================================ */
+
+/* Base TextField Container */
+.md-textfield {
+  position: relative;
+  width: 100%;
+}
+
+/* ========================================
+   OUTLINED TEXT FIELD (Default)
+   ======================================== */
+
+.md-textfield--outlined {
+  position: relative;
+}
+
+.md-textfield--outlined .md-textfield__input {
+  width: 100%;
+  height: 56px;
+  padding: 16px;
+  padding-top: 24px;
+  font: var(--md-sys-typescale-body-large);
+  color: var(--md-sys-color-on-surface);
+  background: transparent;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-extra-small);
+  outline: none;
+  transition: border-color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+}
+
+.md-textfield--outlined .md-textfield__input:hover {
+  border-color: var(--md-sys-color-on-surface);
+}
+
+.md-textfield--outlined .md-textfield__input:focus {
+  border-color: var(--md-sys-color-primary);
+  border-width: 2px;
+  padding: 15px;
+  padding-top: 23px;
+}
+
+.md-textfield--outlined .md-textfield__input:disabled {
+  border-color: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent);
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
+  cursor: not-allowed;
+}
+
+/* Floating Label - Outlined */
+.md-textfield--outlined .md-textfield__label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font: var(--md-sys-typescale-body-large);
+  color: var(--md-sys-color-on-surface-variant);
+  pointer-events: none;
+  background: var(--md-sys-color-surface);
+  padding: 0 4px;
+  transition: all var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+  transform-origin: left center;
+}
+
+.md-textfield--outlined .md-textfield__input:focus ~ .md-textfield__label,
+.md-textfield--outlined .md-textfield__input:not(:placeholder-shown) ~ .md-textfield__label {
+  top: 0;
+  transform: translateY(-50%);
+  font: var(--md-sys-typescale-body-small);
+  color: var(--md-sys-color-primary);
+}
+
+.md-textfield--outlined .md-textfield__input:disabled ~ .md-textfield__label {
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
+}
+
+/* Leading Icon - Outlined */
+.md-textfield--outlined .md-textfield__icon-leading {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  color: var(--md-sys-color-on-surface-variant);
+  pointer-events: none;
+  transition: color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+}
+
+.md-textfield--outlined .md-textfield__input:focus ~ .md-textfield__icon-leading {
+  color: var(--md-sys-color-primary);
+}
+
+.md-textfield--outlined .md-textfield__input:not(:placeholder-shown) ~ .md-textfield__icon-leading {
+  left: 16px;
+}
+
+/* Trailing Icon - Outlined */
+.md-textfield--outlined .md-textfield__icon-trailing {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  color: var(--md-sys-color-on-surface-variant);
+  pointer-events: none;
+}
+
+/* Helper Text - Outlined */
+.md-textfield--outlined .md-textfield__helper {
+  display: block;
+  margin-top: 4px;
+  padding: 0 16px;
+  font: var(--md-sys-typescale-body-small);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.md-textfield--outlined .md-textfield__helper--error {
+  color: var(--md-sys-color-error);
+}
+
+/* Error State - Outlined */
+.md-textfield--outlined.md-textfield--error .md-textfield__input {
+  border-color: var(--md-sys-color-error);
+}
+
+.md-textfield--outlined.md-textfield--error .md-textfield__input:focus {
+  border-color: var(--md-sys-color-error);
+}
+
+.md-textfield--outlined.md-textfield--error .md-textfield__label {
+  color: var(--md-sys-color-error);
+}
+
+/* ========================================
+   FILLED TEXT FIELD
+   ======================================== */
+
+.md-textfield--filled {
+  position: relative;
+}
+
+.md-textfield--filled::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--md-sys-color-on-surface-variant);
+  transition: background var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+}
+
+.md-textfield--filled::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--md-sys-color-primary);
+  transform: scaleX(0);
+  transition: transform var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+}
+
+.md-textfield--filled .md-textfield__input {
+  width: 100%;
+  height: 56px;
+  padding: 24px 16px 8px;
+  font: var(--md-sys-typescale-body-large);
+  color: var(--md-sys-color-on-surface);
+  background: var(--md-sys-color-surface-container-highest);
+  border: none;
+  border-radius: var(--md-sys-shape-extra-small) var(--md-sys-shape-extra-small) 0 0;
+  outline: none;
+}
+
+.md-textfield--filled .md-textfield__input:hover {
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-highest) 95%, var(--md-sys-color-on-surface));
+}
+
+.md-textfield--filled .md-textfield__input:focus {
+  background: var(--md-sys-color-surface-container-highest);
+}
+
+.md-textfield--filled .md-textfield__input:focus ~ .md-textfield__label,
+.md-textfield--filled .md-textfield__input:not(:placeholder-shown) ~ .md-textfield__label {
+  top: 8px;
+  font: var(--md-sys-typescale-body-small);
+  color: var(--md-sys-color-primary);
+}
+
+.md-textfield--filled .md-textfield__input:disabled {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 4%, transparent);
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
+  cursor: not-allowed;
+}
+
+.md-textfield--filled .md-textfield__input:disabled ~ .md-textfield__label {
+  color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
+}
+
+/* Floating Label - Filled */
+.md-textfield--filled .md-textfield__label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font: var(--md-sys-typescale-body-large);
+  color: var(--md-sys-color-on-surface-variant);
+  pointer-events: none;
+  transition: all var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+  transform-origin: left center;
+}
+
+/* Focus indicator - Filled */
+.md-textfield--filled:focus-within::after {
+  transform: scaleX(1);
+}
+
+.md-textfield--filled:focus-within::before {
+  background: var(--md-sys-color-on-surface-variant);
+}
+
+/* Error State - Filled */
+.md-textfield--filled.md-textfield--error::before,
+.md-textfield--filled.md-textfield--error::after {
+  background: var(--md-sys-color-error);
+}
+
+.md-textfield--filled.md-textfield--error .md-textfield__label {
+  color: var(--md-sys-color-error);
+}
+
+/* Helper Text - Filled */
+.md-textfield--filled .md-textfield__helper {
+  display: block;
+  margin-top: 4px;
+  padding: 0 16px;
+  font: var(--md-sys-typescale-body-small);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.md-textfield--filled .md-textfield__helper--error {
+  color: var(--md-sys-color-error);
+}
+
+/* ========================================
+   SHARED STYLES
+   ======================================== */
+
+/* Input shared */
+.md-textfield__input::placeholder {
+  color: transparent;
+}
+
+.md-textfield__input::placeholder:not(:focus) {
+  color: var(--md-sys-color-on-surface-variant);
+  opacity: 1;
+}
+
+/* Icon shared */
+.md-textfield__icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* Character Count */
+.md-textfield__counter {
+  display: block;
+  text-align: right;
+  padding: 4px 16px 0;
+  font: var(--md-sys-typescale-body-small);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 600px) {
+  .md-textfield--outlined .md-textfield__input,
+  .md-textfield--filled .md-textfield__input {
+    font-size: 16px; /* Prevent iOS zoom */
+  }
+}
