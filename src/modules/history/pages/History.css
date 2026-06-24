@@ -95,18 +95,36 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 1.25rem;
+  padding: 1.5rem;
   cursor: pointer;
-  transition: all var(--transition);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.history-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--brand);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.status-acima ~ .item-values ~ .item-footer .history-item,
+.history-item:hover::before {
+  background: var(--brand);
 }
 
 .history-item:hover {
-  border-color: var(--brand);
-  box-shadow: var(--shadow-card);
-  transform: translateY(-2px);
+  border-color: transparent;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  transform: translateY(-3px);
 }
 
 .history-item:focus-visible {
@@ -120,6 +138,7 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 0.5rem;
+  padding-left: 0.5rem;
 }
 
 .item-date {
@@ -157,13 +176,18 @@
 
 /* Status Badge */
 .item-status {
-  padding: 0.25rem 0.6rem;
+  padding: 0.25rem 0.7rem;
   border-radius: 20px;
   font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   white-space: nowrap;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.item-status:hover {
+  transform: scale(1.05);
 }
 
 .status-acima {
@@ -193,6 +217,7 @@
   flex-direction: column;
   gap: 0.4rem;
   padding: 0.6rem 0;
+  padding-left: 0.5rem;
   border-top: 1px solid var(--border);
 }
 
@@ -203,9 +228,9 @@
 }
 
 .value-label {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
   color: var(--text-muted);
   font-weight: 600;
 }
@@ -216,6 +241,7 @@
   font-size: 0.95rem;
   color: var(--text-heading);
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
 }
 
 .value-arrow {
@@ -240,6 +266,7 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 0.5rem;
+  padding-left: 0.5rem;
   border-top: 1px solid var(--border);
 }
 

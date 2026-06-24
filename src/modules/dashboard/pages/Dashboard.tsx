@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { toPng } from 'html-to-image';
 import { useTrocas } from '../hooks/useTrocas';
@@ -14,6 +14,8 @@ import type { KPIData } from '../../../shared/types/trocas';
 import { formatBRL, formatarStatusMetaTotal, formatarDiferenca } from '../../../shared/utils/formatters';
 import { calculateTotals } from '../../../shared/utils/calculations';
 import './Dashboard.css';
+
+type SortMode = 'default' | 'name' | 'diferenca' | 'atingimento';
 
 export const Dashboard = () => {
   const dashboardRef = useRef<HTMLDivElement>(null);
@@ -36,6 +38,8 @@ export const Dashboard = () => {
 
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
+  const [sortMode, setSortMode] = useState<SortMode>('default');
+  const [editCount, setEditCount] = useState<number>(0);
 
   const { pullDistance, isRefreshing } = usePullToRefresh(
     dashboardRef as React.RefObject<HTMLDivElement | null>,
@@ -100,6 +104,7 @@ export const Dashboard = () => {
   const handleEdit = useCallback(
     (id: string, field: 'realizado' | 'meta', value: number): void => {
       updateSetor(id, field, value);
+      setEditCount((prev) => prev + 1);
     },
     [updateSetor]
   );
@@ -110,6 +115,7 @@ export const Dashboard = () => {
       const success = await saveAll();
       if (success) {
         addToast('Dados salvos com sucesso!', 'success');
+        setEditCount(0);
       } else {
         addToast('Erro ao salvar dados', 'error');
       }
@@ -119,6 +125,46 @@ export const Dashboard = () => {
       setSaving(false);
     }
   }, [saveAll, addToast]);
+
+  // Confirmação ao sair com alterações pendentes
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent): void => {
+      if (hasChanges) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [hasChanges]);
+
+  // Atalho Ctrl+S para salvar
+  useEffect(() => {
+    const handler = (e: KeyboardEvent): void => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (hasChanges && !saving) {
+          handleSave();
+        }
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [hasChanges, saving, handleSave]);
+
+  // Setores ordenados
+  const sortedSetores = useMemo(() => {
+    const list = [...setoresAtuais];
+    switch (sortMode) {
+      case 'name':
+        return list.sort((a, b) => a.categoria.localeCompare(b.categoria));
+      case 'diferenca':
+        return list.sort((a, b) => Math.abs(b.diferenca) - Math.abs(a.diferenca));
+      case 'atingimento':
+        return list.sort((a, b) => b.percentual - a.percentual);
+      default:
+        return list;
+    }
+  }, [setoresAtuais, sortMode]);
 
   const handleExport = useCallback(async (): Promise<void> => {
     if (!dashboardRef.current) return;
@@ -171,13 +217,13 @@ export const Dashboard = () => {
           <SkeletonKPI />
         </section>
         <section className="content-grid">
-          <div className="card tabela-card">
-            <h2>DETALHAMENTO POR SETOR</h2>
-            <div className="department-grid skeleton-grid">
-              <div className="skeleton-card" />
-              <div className="skeleton-card" />
-              <div className="skeleton-card" />
-            </div>
+          <div className="section-header">
+            <h2 className="section-title">DETALHAMENTO POR SETOR</h2>
+          </div>
+          <div className="department-grid skeleton-grid">
+            <div className="skeleton-card" />
+            <div className="skeleton-card" />
+            <div className="skeleton-card" />
           </div>
         </section>
       </div>
@@ -240,29 +286,50 @@ export const Dashboard = () => {
 
       {setoresAtuais.length > 0 ? (
         <section className="content-grid">
-          <div className="card tabela-card">
-            <h2>DETALHAMENTO POR SETOR</h2>
-            <div className="department-grid">
-              {setoresAtuais.map((setor) => (
-                <DepartmentCard
-                  key={setor.id}
-                  setor={setor}
-                  isMelhor={setor.categoria === melhor}
-                  isCritico={setor.categoria === critico}
-                  readonly={user?.role !== 'admin'}
-                  onEdit={handleEdit}
-                />
-              ))}
+          {hasChanges && (
+            <div className="unsaved-banner">
+              <span className="unsaved-dot" />
+              Alterações não salvas
+              {editCount > 0 && <span className="edit-count">{editCount}</span>}
             </div>
+          )}
+          <div className="section-header">
+            <h2 className="section-title">DETALHAMENTO POR SETOR</h2>
+            <div className="sort-controls">
+              <button className={`sort-btn ${sortMode === 'default' ? 'active' : ''}`} onClick={() => setSortMode('default')}>Padrão</button>
+              <button className={`sort-btn ${sortMode === 'name' ? 'active' : ''}`} onClick={() => setSortMode('name')}>A-Z</button>
+              <button className={`sort-btn ${sortMode === 'diferenca' ? 'active' : ''}`} onClick={() => setSortMode('diferenca')}>Diferença</button>
+              <button className={`sort-btn ${sortMode === 'atingimento' ? 'active' : ''}`} onClick={() => setSortMode('atingimento')}>Atingimento</button>
+            </div>
+          </div>
+          <div className="department-grid">
+            {sortedSetores.map((setor) => (
+              <DepartmentCard
+                key={setor.id}
+                setor={setor}
+                isMelhor={setor.categoria === melhor}
+                isCritico={setor.categoria === critico}
+                readonly={user?.role !== 'admin'}
+                onEdit={handleEdit}
+              />
+            ))}
           </div>
         </section>
       ) : (
         <section className="content-grid">
           <div className="card empty-state">
-            <p>Nenhum departamento cadastrado.</p>
+            <svg className="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <path d="M3 9h18" />
+              <path d="M9 21V9" />
+            </svg>
+            <p>Nenhum departamento cadastrado</p>
             <p className="empty-sub">Cadastre departamentos e metas para começar a usar o dashboard.</p>
             {user?.role === 'admin' ? (
               <Link to="/departamentos" className="btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
                 Cadastrar departamentos
               </Link>
             ) : (

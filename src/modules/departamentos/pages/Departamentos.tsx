@@ -166,64 +166,59 @@ export const Departamentos: React.FC = () => {
         </button>
       </header>
 
-      <section className="departamentos-table-section">
-        <div className="card">
-          <div className="departamentos-table-wrap">
-            <table className="departamentos-table" aria-label="Lista de departamentos">
-              <thead>
-                <tr>
-                  <th>ORDEM</th>
-                  <th>NOME</th>
-                  <th>META MENSAL</th>
-                  <th>STATUS</th>
-                  <th>AÇÕES</th>
-                </tr>
-              </thead>
-              <tbody>
-                {departamentos.map((dep) => (
-                  <tr key={dep.id} className={!dep.ativo ? 'row-inactive' : ''}>
-                    <td>{dep.ordem}</td>
-                    <td className="dep-nome">{dep.nome}</td>
-                    <td className="dep-meta">{formatBRL(dep.meta_mensal)}</td>
-                    <td>
-                      <button
-                        className={`status-toggle ${dep.ativo ? 'active' : 'inactive'}`}
-                        onClick={() => handleToggleAtivo(dep)}
-                      >
-                        {dep.ativo ? 'Ativo' : 'Inativo'}
-                      </button>
-                    </td>
-                    <td className="actions-cell">
-                      <button className="action-btn-sm edit" onClick={() => openEdit(dep)} title="Editar">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                        </svg>
-                      </button>
-                      <button className="action-btn-sm delete" onClick={() => setDeleteTarget(dep)} title="Excluir">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <polyline points="3 6 5 6 21 6" />
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              {departamentos.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="empty-row">
-                    <p>Nenhum departamento cadastrado</p>
-                    <button className="btn-primary" onClick={handleSeedDefaults} style={{ marginTop: '1rem' }}>
-                      Cadastrar departamentos padrão
-                    </button>
-                  </td>
-                </tr>
-              )}
-              </tbody>
-            </table>
+      {departamentos.length > 0 ? (
+        <section className="departamentos-grid-section">
+          <div className="departamentos-grid">
+            {departamentos.map((dep) => (
+              <div key={dep.id} className={`departamento-card${!dep.ativo ? ' inactive' : ''}`}>
+                <div className="card-header">
+                  <span className="card-ordem">#{String(dep.ordem).padStart(2, '0')}</span>
+                  <button
+                    className={`status-toggle ${dep.ativo ? 'active' : 'inactive'}`}
+                    onClick={() => handleToggleAtivo(dep)}
+                  >
+                    {dep.ativo ? 'Ativo' : 'Inativo'}
+                  </button>
+                </div>
+
+                <div className="card-body">
+                  <h3 className="card-nome">{dep.nome}</h3>
+                  <div className="card-meta-label">Meta Mensal</div>
+                  <div className="card-meta">{formatBRL(dep.meta_mensal)}</div>
+                </div>
+
+                <div className="card-actions">
+                  <button className="btn-action edit" onClick={() => openEdit(dep)} title="Editar departamento">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    Editar
+                  </button>
+                  <button className="btn-action delete" onClick={() => setDeleteTarget(dep)} title="Excluir departamento">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                    Excluir
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      </section>
+        </section>
+      ) : (
+        <section className="departamentos-empty">
+          <div className="card">
+            <div className="empty-state-content">
+              <p>Nenhum departamento cadastrado</p>
+              <button className="btn-primary" onClick={handleSeedDefaults}>
+                Cadastrar departamentos padrão
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
 
       {showForm && (
         <div className="modal-overlay" onClick={closeForm}>

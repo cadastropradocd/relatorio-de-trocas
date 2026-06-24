@@ -103,16 +103,17 @@ export const DepartmentCard = ({
             aria-label={`${readonly ? 'Visualizar' : 'Editar'} meta de ${setor.categoria}`}
           />
         </div>
-      </div>
 
-      <div className="dept-footer">
-        <div className="dept-status-row">
+        <div className="dept-field dept-field-diferenca">
           <span className="dept-label">Diferença</span>
           <span className={`dept-diferenca ${statusClass}`}>
             {formatBRL(Math.abs(setor.diferenca))}
             <span className="dept-seta">{isPositivo ? ' ↑' : isNegativo ? ' ↓' : ' →'}</span>
           </span>
         </div>
+      </div>
+
+      <div className="dept-footer">
         <div className="dept-status-row">
           <span className="dept-label">Atingimento</span>
           <span className={`dept-percentual ${statusClass}`}>

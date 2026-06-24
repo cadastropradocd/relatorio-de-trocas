@@ -21,105 +21,223 @@
   text-transform: uppercase;
 }
 
-.departamentos-table-section .card {
-  border-radius: var(--radius-md);
+/* ===== GRID DE CARDS ===== */
+
+.departamentos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.departamento-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-left: 4px solid var(--brand);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
   box-shadow: var(--shadow-card);
-  padding: 1.25rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
 }
 
-.departamentos-table-wrap {
-  overflow-x: auto;
+.departamento-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--brand);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
-.departamentos-table {
-  width: 100%;
-  border-collapse: collapse;
+.departamento-card.inactive::before {
+  background: var(--text-muted);
 }
 
-.departamentos-table th {
-  text-align: left;
-  padding: 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--brand);
-  text-transform: uppercase;
+.departamento-card.inactive {
+  opacity: 0.55;
+}
+
+.departamento-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* ===== CARD HEADER ===== */
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 0.5rem;
+}
+
+.card-ordem {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--text-muted);
   letter-spacing: 0.05em;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-sm);
+}
+
+/* ===== CARD BODY ===== */
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.25rem 0 0.5rem 0.5rem;
   border-bottom: 1px solid var(--border);
 }
 
-.departamentos-table td {
-  padding: 0.75rem;
-  font-size: 0.85rem;
-  color: var(--text);
-  border-bottom: 1px solid var(--border);
+.card-nome {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0;
+  line-height: 1.3;
 }
 
-.departamentos-table tr:last-child td {
-  border-bottom: none;
-}
-
-.departamentos-table tr:hover td {
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.row-inactive td {
-  opacity: 0.5;
-}
-
-.dep-nome {
+.card-meta-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
   font-weight: 600;
+  margin-top: 0.35rem;
 }
 
-.dep-meta {
+.card-meta {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--brand);
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
 }
+
+/* ===== STATUS TOGGLE ===== */
 
 .status-toggle {
   border: none;
-  padding: 0.3rem 0.75rem;
+  padding: 0.25rem 0.7rem;
   border-radius: 20px;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-width: 72px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 66px;
   text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .status-toggle.active {
-  background: var(--ok-bg);
-  color: var(--ok);
+  background: rgba(76, 175, 80, 0.15);
+  color: #66bb6a;
 }
 
 .status-toggle.inactive {
-  background: var(--danger-bg);
-  color: var(--danger);
+  background: rgba(244, 67, 54, 0.12);
+  color: #ef5350;
 }
 
 .status-toggle:hover {
-  transform: scale(1.05);
+  transform: scale(1.06);
+  filter: brightness(1.2);
 }
 
 .status-toggle:active {
   transform: scale(0.95);
 }
 
-@media (max-width: 768px) {
-  .departamentos-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  .departamentos-table th,
-  .departamentos-table td {
-    padding: 0.5rem;
-    font-size: 0.8rem;
-  }
+/* ===== CARD ACTIONS ===== */
+
+.card-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding-left: 0.5rem;
+  padding-top: 0.25rem;
 }
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+.btn-action svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.btn-action.edit {
+  color: var(--brand);
+  border-color: rgba(66, 133, 244, 0.25);
+}
+
+.btn-action.edit:hover {
+  background: rgba(66, 133, 244, 0.1);
+  border-color: rgba(66, 133, 244, 0.4);
+  box-shadow: 0 0 0 1px rgba(66, 133, 244, 0.1);
+}
+
+.btn-action.delete {
+  color: #ef5350;
+  border-color: rgba(244, 67, 54, 0.2);
+}
+
+.btn-action.delete:hover {
+  background: rgba(244, 67, 54, 0.08);
+  border-color: rgba(244, 67, 54, 0.35);
+  box-shadow: 0 0 0 1px rgba(244, 67, 54, 0.08);
+}
+
+/* ===== EMPTY STATE ===== */
+
+.departamentos-empty .card {
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--brand);
+  box-shadow: var(--shadow-card);
+}
+
+.empty-state-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  gap: 1.25rem;
+}
+
+.empty-state-content p {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ===== MODAL ===== */
 
 .modal-overlay {
   position: fixed;
@@ -156,4 +274,31 @@
   margin-top: 1.5rem;
 }
 
+/* ===== RESPONSIVO ===== */
 
+@media (max-width: 1100px) {
+  .departamentos-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .departamentos-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .departamentos-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .departamento-card {
+    padding: 1.25rem;
+  }
+
+  .card-meta {
+    font-size: 1.3rem;
+  }
+}

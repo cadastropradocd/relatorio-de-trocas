@@ -168,56 +168,53 @@ export const Users: React.FC = () => {
         </button>
       </header>
 
-      <section className="users-table-section">
-        <div className="card">
-          <div className="users-table-wrap">
-            <table className="users-table" aria-label="Lista de usuários">
-              <thead>
-                <tr>
-                  <th>NOME</th>
-                  <th>USUARIO</th>
-                  <th>ROLE</th>
-                  <th>CRIADO EM</th>
-                  <th>AÇÕES</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((u) => (
-                  <tr key={u.id}>
-                    <td>{u.name || '-'}</td>
-                    <td>{u.username}</td>
-                    <td>
-                      <span className={`role-badge role-${u.role}`}>
-                        {u.role === 'admin' ? 'Admin' : 'Usuário'}
-                      </span>
-                    </td>
-                    <td>{formatarDataDiaMesAno(new Date(u.criado_em))}</td>
-                    <td className="actions-cell">
-                      <button className="action-btn-sm edit" onClick={() => openEdit(u)} title="Editar">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                        </svg>
-                      </button>
-                      <button className="action-btn-sm delete" onClick={() => setDeleteTarget(u)} title="Excluir">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <polyline points="3 6 5 6 21 6" />
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {users.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="empty-row">Nenhum usuário encontrado</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+      {users.length > 0 ? (
+        <section className="users-grid-section">
+          <div className="users-grid">
+            {users.map((u) => (
+              <div key={u.id} className="user-card">
+                <div className="card-header">
+                  <span className="card-username">@{u.username}</span>
+                  <span className={`role-badge role-${u.role}`}>
+                    {u.role === 'admin' ? 'Admin' : 'Usuário'}
+                  </span>
+                </div>
+
+                <div className="card-body">
+                  <h3 className="card-nome">{u.name || '-'}</h3>
+                  <div className="card-meta-label">Criado em</div>
+                  <div className="card-meta">{formatarDataDiaMesAno(new Date(u.criado_em))}</div>
+                </div>
+
+                <div className="card-actions">
+                  <button className="btn-action edit" onClick={() => openEdit(u)} title="Editar usuário">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    Editar
+                  </button>
+                  <button className="btn-action delete" onClick={() => setDeleteTarget(u)} title="Excluir usuário">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                    Excluir
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      </section>
+        </section>
+      ) : (
+        <section className="users-empty">
+          <div className="card">
+            <div className="empty-state-content">
+              <p>Nenhum usuário encontrado</p>
+            </div>
+          </div>
+        </section>
+      )}
 
       {modalMode && (
         <div className="modal-overlay" onClick={closeModal}>

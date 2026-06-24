@@ -1,17 +1,18 @@
-/* DepartmentCard - Professional */
+/* DepartmentCard - Professional Premium */
 .department-card {
-  background: linear-gradient(145deg, var(--md-sys-color-surface-container) 0%, var(--md-sys-color-surface-container-low) 100%);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--md-sys-color-surface-container) 0%, var(--md-sys-color-surface-container-low) 100%);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, var(--md-sys-color-surface-container));
   border-radius: var(--radius-md);
-  padding: 1.25rem 1.25rem 1rem;
+  padding: 1rem 1rem 0.85rem;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-  transition: all var(--transition);
+  gap: 0.5rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
 
+/* Top accent bar - subtle by default, visible on hover */
 .department-card::before {
   content: '';
   position: absolute;
@@ -20,23 +21,26 @@
   right: 0;
   height: 3px;
   background: linear-gradient(90deg, var(--brand) 0%, color-mix(in srgb, var(--brand) 40%, transparent) 100%);
-  opacity: 0;
-  transition: opacity 0.2s;
+  opacity: 0.12;
+  transition: opacity 0.3s ease;
 }
 
 .department-card:hover {
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), 0 0 0 1px color-mix(in srgb, var(--brand) 15%, transparent);
   transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--brand) 30%, var(--border));
+  border-color: color-mix(in srgb, var(--brand) 25%, var(--border));
 }
 
 .department-card:hover::before {
   opacity: 1;
 }
 
-/* Melhor/Critico */
+/* ========================================
+   Melhor / Critico States
+   ======================================== */
+
 .department-card.dept-melhor {
-  border-color: color-mix(in srgb, var(--ok) 25%, var(--border));
+  border-color: color-mix(in srgb, var(--ok) 20%, var(--border));
 }
 
 .department-card.dept-melhor::before {
@@ -45,7 +49,7 @@
 }
 
 .department-card.dept-critico {
-  border-color: color-mix(in srgb, var(--danger) 25%, var(--border));
+  border-color: color-mix(in srgb, var(--danger) 20%, var(--border));
 }
 
 .department-card.dept-critico::before {
@@ -53,7 +57,10 @@
   background: linear-gradient(90deg, var(--danger) 0%, color-mix(in srgb, var(--danger) 40%, transparent) 100%);
 }
 
-/* Header */
+/* ========================================
+   Header
+   ======================================== */
+
 .dept-header {
   display: flex;
   justify-content: space-between;
@@ -63,56 +70,80 @@
 
 .dept-name {
   font-family: var(--font-display);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 800;
   color: var(--text-heading);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
+  line-height: 1.2;
 }
 
 .dept-badge {
-  padding: 0.2rem 0.55rem;
+  padding: 0.18rem 0.55rem;
   border-radius: 20px;
-  font-size: 0.58rem;
+  font-size: 0.55rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.dept-badge:hover {
+  transform: scale(1.05);
 }
 
 .badge-melhor {
-  background: var(--ok-bg);
+  background: rgba(76, 175, 80, 0.12);
   color: var(--ok);
-  border: 1px solid color-mix(in srgb, var(--ok) 25%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ok) 20%, transparent);
 }
 
 .badge-critico {
-  background: var(--danger-bg);
+  background: rgba(244, 67, 54, 0.12);
   color: var(--danger);
-  border: 1px solid color-mix(in srgb, var(--danger) 25%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger) 20%, transparent);
 }
 
-/* Fields */
+/* ========================================
+   Fields (Realizado / Meta)
+   ======================================== */
+
 .dept-fields {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0;
 }
 
 .dept-field {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 1rem;
-  padding: 0.35rem 0;
+  gap: 0.75rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px dashed color-mix(in srgb, var(--border) 50%, transparent);
+}
+
+.dept-field-diferenca {
+  border-bottom: none;
+  padding-top: 0.15rem;
+}
+
+.dept-field-diferenca .dept-diferenca {
+  font-size: 0.9rem;
+}
+
+.dept-field:last-child {
+  border-bottom: none;
 }
 
 .dept-label {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   color: var(--text-muted);
   font-weight: 600;
-  opacity: 0.8;
+  opacity: 0.7;
   flex-shrink: 0;
 }
 
@@ -121,23 +152,24 @@
   min-width: 0;
   flex: 1;
   height: auto;
-  padding: 0;
+  padding: 0.1rem 0.3rem;
   background: transparent;
   border: 1px solid transparent;
   border-radius: 0;
   color: var(--text-heading);
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 800;
   text-align: right;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
   transition: all 150ms ease;
   cursor: default;
 }
 
 .dept-input:not(:disabled):hover {
-  background: color-mix(in srgb, var(--md-sys-color-primary) 5%, transparent);
-  border-color: var(--border);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 4%, transparent);
+  border-color: color-mix(in srgb, var(--border) 60%, transparent);
   border-radius: var(--radius-sm);
   cursor: text;
 }
@@ -147,7 +179,7 @@
   background: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
   border-color: var(--brand);
   border-radius: var(--radius-sm);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary) 10%, transparent);
   cursor: text;
 }
 
@@ -158,29 +190,32 @@
 
 .dept-input.cell-ok {
   border-color: var(--ok);
-  background: color-mix(in srgb, var(--ok) 10%, transparent);
+  background: color-mix(in srgb, var(--ok) 8%, transparent);
 }
 
 .dept-input.cell-error {
   border-color: var(--danger);
-  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
 }
 
-/* Footer */
+/* ========================================
+   Footer (Diferença / Atingimento)
+   ======================================== */
+
 .dept-footer {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 1rem;
-  padding-top: 0.6rem;
-  border-top: 1px solid var(--border);
+  gap: 0.5rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
   margin-top: auto;
 }
 
 .dept-status-row {
   display: flex;
   align-items: baseline;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .dept-status-row:last-child {
@@ -190,25 +225,36 @@
 .dept-diferenca {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-variant-numeric: tabular-nums;
   line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-left: auto;
 }
 
 .dept-seta {
-  font-size: 0.8em;
-  margin-left: 0.15rem;
+  font-size: 0.75em;
+  margin-left: 0.1rem;
+  transition: transform 0.2s ease;
+}
+
+.department-card:hover .dept-seta {
+  transform: translateX(2px);
 }
 
 .dept-percentual {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
   line-height: 1.2;
+  margin-left: auto;
 }
 
-/* Status colors */
+/* ========================================
+   Status Colors
+   ======================================== */
+
 .dept-diferenca.status-negativo,
 .dept-percentual.status-negativo {
   color: var(--danger-light);
@@ -224,14 +270,18 @@
   color: var(--text-muted);
 }
 
-/* Responsive */
+/* ========================================
+   Responsive
+   ======================================== */
+
 @media (max-width: 1100px) {
   .department-card {
-    padding: 1rem;
+    padding: 0.85rem 0.85rem 0.7rem;
+    gap: 0.4rem;
   }
 
   .dept-name {
-    font-size: 0.85rem;
+    font-size: 0.78rem;
   }
 
   .dept-input {
@@ -239,10 +289,10 @@
   }
 
   .dept-diferenca {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
   }
 
   .dept-percentual {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
   }
 }

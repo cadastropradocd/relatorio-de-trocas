@@ -26,20 +26,21 @@ const SkeletonCard = (): JSX.Element => (
       <div className="skeleton-box" style={{ width: 70, height: 24, borderRadius: 20 }} />
     </div>
     <div className="item-values">
-      <div className="value-col">
-        <div className="skeleton-box" style={{ width: 60, height: 14, marginBottom: 4 }} />
+      <div className="value-row">
+        <div className="skeleton-box" style={{ width: 60, height: 14 }} />
         <div className="skeleton-box" style={{ width: 100, height: 20 }} />
       </div>
-      <div className="value-divider" />
-      <div className="value-col">
-        <div className="skeleton-box" style={{ width: 60, height: 14, marginBottom: 4 }} />
+      <div className="value-row">
+        <div className="skeleton-box" style={{ width: 60, height: 14 }} />
         <div className="skeleton-box" style={{ width: 100, height: 20 }} />
       </div>
-      <div className="value-divider" />
-      <div className="value-col">
-        <div className="skeleton-box" style={{ width: 60, height: 14, marginBottom: 4 }} />
+      <div className="value-row">
+        <div className="skeleton-box" style={{ width: 60, height: 14 }} />
         <div className="skeleton-box" style={{ width: 100, height: 20 }} />
       </div>
+    </div>
+    <div className="item-footer">
+      <div className="skeleton-box" style={{ width: 120, height: 14 }} />
     </div>
   </div>
 );
