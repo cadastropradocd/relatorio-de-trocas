@@ -95,6 +95,30 @@ describe('AuthService', () => {
       expect(result).toBeNull();
     });
 
+    it('deve retornar o usuário quando a sessão ainda está válida', async () => {
+      localStorage.setItem('trocas_session', JSON.stringify({
+        user: { username: 'test' },
+        timestamp: Date.now() - 23 * 60 * 60 * 1000,
+      }));
+
+      mockGetDocs.mockResolvedValue({
+        empty: false,
+        docs: [{
+          id: 'user-123',
+          data: () => ({
+            username: 'test',
+            email: 'test@trocas.app',
+            name: 'Test User',
+            role: 'user',
+            criado_em: '2026-01-01',
+          }),
+        }],
+      });
+
+      const result = await getCurrentUser();
+      expect(result?.username).toBe('test');
+    });
+
     it('deve retornar null quando a sessão expirou', async () => {
       localStorage.setItem('trocas_session', JSON.stringify({
         user: { username: 'test' },

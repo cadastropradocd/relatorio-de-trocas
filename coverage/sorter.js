@@ -208,3 +208,4 @@ var addSorting = (function() {
 })();
 
 window.addEventListener('load', addSorting);
+

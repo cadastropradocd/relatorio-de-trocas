@@ -6,7 +6,7 @@ import { getAllDepartamentos } from '../../departamentos/services/departamentoSe
 import { BarChart } from '../../../shared/components/Chart';
 import { IconTotal, IconMeta, IconDiferenca, IconAtingimento } from '../../../shared/components/Icons';
 import { SkeletonKPI } from '../../../shared/components/Skeleton';
-import { formatBRL, formatarDataDiaMesAno } from '../../../shared/utils/formatters';
+import { formatBRL, formatarDataDiaMesAno, getStatusFromDifference, getStatusFromValues } from '../../../shared/utils/formatters';
 import { calculateTotals } from '../../../shared/utils/calculations';
 import { logger } from '../../../shared/utils/logger';
 import type { TrocasData, KPIData, Departamento } from '../../../shared/types/trocas';
@@ -216,7 +216,7 @@ export const Reports: React.FC = () => {
         formattedValue: formatBRL(totalDiferenca),
         icon: <IconDiferenca />,
         tooltip: 'Diferença entre realizado e meta no período',
-        status: totalDiferenca > 0 ? 'negativo' : 'positivo',
+        status: getStatusFromDifference(totalDiferenca),
       },
       {
         label: 'ATINGIMENTO MÉDIO',
@@ -225,7 +225,7 @@ export const Reports: React.FC = () => {
         subValue: `Total: ${formatBRL(totalRealizado)} / ${formatBRL(totalMeta)}`,
         icon: <IconAtingimento />,
         tooltip: 'Percentual médio de atingimento da meta no período',
-        status: pctMedio > 0 ? 'negativo' : pctMedio < 0 ? 'positivo' : 'neutro',
+        status: getStatusFromValues(totalRealizado, totalMeta),
       },
     ];
   }, [filteredData]);
@@ -243,7 +243,7 @@ export const Reports: React.FC = () => {
         meta,
         diferenca,
         percentual: meta > 0 ? ((realizado - meta) / meta) * 100 : 0,
-        status: (diferenca > 0 ? 'negativo' : diferenca < 0 ? 'positivo' : 'neutro') as 'positivo' | 'negativo' | 'neutro',
+        status: getStatusFromDifference(diferenca),
       };
     });
   }, [filteredData]);

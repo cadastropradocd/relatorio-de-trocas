@@ -8,5 +8,7 @@ export {
   formatarDataDiaMesAno,
   formatarDataArquivo,
   normalizarTexto,
+  getStatusFromDifference,
+  getStatusFromValues,
   classeStatus,
 } from './formatters';

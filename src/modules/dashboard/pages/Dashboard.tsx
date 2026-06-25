@@ -11,7 +11,7 @@ import { SkeletonKPI } from '../../../shared/components/Skeleton';
 import { IconTotal, IconMeta, IconDiferenca } from '../../../shared/components/Icons';
 import { usePullToRefresh } from '../../../shared/hooks/usePullToRefresh';
 import type { KPIData } from '../../../shared/types/trocas';
-import { formatBRL, formatarStatusMetaTotal, formatarDiferenca } from '../../../shared/utils/formatters';
+import { formatBRL, formatarStatusMetaTotal, formatarDiferenca, getStatusFromDifference } from '../../../shared/utils/formatters';
 import { calculateTotals } from '../../../shared/utils/calculations';
 import './Dashboard.css';
 
@@ -96,7 +96,7 @@ export const Dashboard = () => {
         subValue: formatarStatusMetaTotal(total_realizado, total_meta),
         icon: <IconDiferenca />,
         tooltip: 'Diferença entre realizado e meta',
-        status: total_diferenca > 0 ? 'negativo' : 'positivo',
+        status: getStatusFromDifference(total_diferenca),
       },
     ];
   }, [setoresAtuais]);

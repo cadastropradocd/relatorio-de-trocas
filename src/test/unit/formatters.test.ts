@@ -10,6 +10,8 @@ import {
   formatarDataArquivo,
   normalizarTexto,
   classeStatus,
+  getStatusFromDifference,
+  getStatusFromValues,
 } from '@/shared/utils/formatters';
 
 describe('formatters', () => {
@@ -171,6 +173,22 @@ describe('formatters', () => {
     it('deve retornar "status-positivo" para valores negativos', () => {
       expect(classeStatus(-10)).toBe('status-positivo');
       expect(classeStatus(-0.1)).toBe('status-positivo');
+    });
+  });
+
+  describe('getStatusFromDifference', () => {
+    it('deve seguir a regra de negocio da meta como limite maximo', () => {
+      expect(getStatusFromDifference(10)).toBe('negativo');
+      expect(getStatusFromDifference(0)).toBe('neutro');
+      expect(getStatusFromDifference(-10)).toBe('positivo');
+    });
+  });
+
+  describe('getStatusFromValues', () => {
+    it('deve calcular o status a partir de realizado e meta', () => {
+      expect(getStatusFromValues(120, 100)).toBe('negativo');
+      expect(getStatusFromValues(100, 100)).toBe('neutro');
+      expect(getStatusFromValues(80, 100)).toBe('positivo');
     });
   });
 });

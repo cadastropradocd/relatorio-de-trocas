@@ -13,16 +13,52 @@ import { logger } from '../../../shared/utils/logger';
 
 const USUARIOS_COLLECTION = 'usuarios';
 const SESSION_KEY = 'trocas_session';
+const SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const SALT_LENGTH = 16;
 const RATE_LIMIT_KEY = 'trocas_login_attempts';
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS = 15 * 60 * 1000;
+const AUTH_ERROR_MESSAGE = 'Usuário ou senha incorretos.';
 
 interface RateLimitData {
   count: number;
   firstAttempt: number;
   lockedUntil?: number;
 }
+
+interface SessionData {
+  user: User;
+  timestamp: number;
+}
+
+const normalizeUsername = (username: string): string => username.trim().toLowerCase();
+
+const buildUserFromDoc = (id: string, userData: Record<string, unknown>): User => ({
+  id,
+  username: String(userData.username || ''),
+  email: String(userData.email || ''),
+  name: (userData.name as string | null | undefined) || null,
+  avatar_url: (userData.avatar_url as string | null | undefined) || null,
+  role: userData.role === 'admin' ? 'admin' : 'user',
+  criado_em: String(userData.criado_em || new Date().toISOString()),
+});
+
+const saveSession = (user: User): void => {
+  const session: SessionData = { user, timestamp: Date.now() };
+  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+};
+
+const readSession = (): SessionData | null => {
+  const raw = localStorage.getItem(SESSION_KEY);
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as SessionData;
+  } catch {
+    localStorage.removeItem(SESSION_KEY);
+    return null;
+  }
+};
 
 const getRateLimit = (username: string): RateLimitData => {
   const raw = localStorage.getItem(`${RATE_LIMIT_KEY}_${username}`);
@@ -110,7 +146,7 @@ export const signIn = async (username: string, password: string): Promise<AuthEr
   try {
     logger.info('authService', `Tentando login: ${username}`);
 
-    const normalizedUsername = username.trim().toLowerCase();
+    const normalizedUsername = normalizeUsername(username);
 
     const rateData = getRateLimit(normalizedUsername);
     if (isLocked(rateData)) {
@@ -128,7 +164,7 @@ export const signIn = async (username: string, password: string): Promise<AuthEr
     if (snapshot.empty) {
       recordAttempt(normalizedUsername);
       logger.warn('authService', 'Usuário não encontrado');
-      return { message: 'Usuário ou senha incorretos.' };
+      return { message: AUTH_ERROR_MESSAGE };
     }
 
     const userDoc = snapshot.docs[0];
@@ -148,7 +184,7 @@ export const signIn = async (username: string, password: string): Promise<AuthEr
     if (inputHash !== storedHash) {
       recordAttempt(normalizedUsername);
       logger.warn('authService', 'Senha incorreta');
-      return { message: 'Usuário ou senha incorretos.' };
+      return { message: AUTH_ERROR_MESSAGE };
     }
 
     clearAttempts(normalizedUsername);
@@ -161,18 +197,8 @@ export const signIn = async (username: string, password: string): Promise<AuthEr
       }
     }
 
-    const user: User = {
-      id: userDoc.id,
-      username: userData.username as string,
-      email: userData.email as string || '',
-      name: userData.name as string || null,
-      avatar_url: userData.avatar_url as string || null,
-      role: userData.role as 'admin' | 'user',
-      criado_em: userData.criado_em as string || new Date().toISOString(),
-    };
-
-    const session = { user, timestamp: Date.now() };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    const user = buildUserFromDoc(userDoc.id, userData as Record<string, unknown>);
+    saveSession(user);
 
     logger.info('authService', 'Login realizado com sucesso');
     return null;
@@ -189,13 +215,14 @@ export const signUp = async (
 ): Promise<AuthError | null> => {
   try {
     logger.info('authService', `Criando conta: ${username}`);
-    const email = `${username.toLowerCase().trim()}@trocas.app`;
+    const normalizedUsername = normalizeUsername(username);
+    const email = `${normalizedUsername}@trocas.app`;
     const salt = generateSalt();
     const passwordHash = await hashPassword(password, salt);
 
     const q = query(
       collection(db, USUARIOS_COLLECTION),
-      where('username', '==', username.trim().toLowerCase())
+      where('username', '==', normalizedUsername)
     );
     const existing = await getDocs(q);
 
@@ -205,7 +232,7 @@ export const signUp = async (
 
     const uid = crypto.randomUUID();
     await setDoc(doc(db, USUARIOS_COLLECTION, uid), {
-      username: username.trim().toLowerCase(),
+      username: normalizedUsername,
       email,
       name,
       password_hash: passwordHash,
@@ -229,13 +256,12 @@ export const signOut = async (): Promise<void> => {
 };
 
 export const getCurrentUser = async (): Promise<User | null> => {
-  const session = localStorage.getItem(SESSION_KEY);
+  const session = readSession();
   if (!session) return null;
 
   try {
-    const { user, timestamp } = JSON.parse(session);
-    const SESSION_MAX_AGE = 8 * 60 * 60 * 1000;
-    if (Date.now() - timestamp > SESSION_MAX_AGE) {
+    const { user, timestamp } = session;
+    if (Date.now() - timestamp > SESSION_MAX_AGE_MS) {
       localStorage.removeItem(SESSION_KEY);
       return null;
     }
@@ -252,15 +278,7 @@ export const getCurrentUser = async (): Promise<User | null> => {
     }
 
     const userData = snapshot.docs[0].data();
-    return {
-      id: snapshot.docs[0].id,
-      username: userData.username as string,
-      email: userData.email as string || '',
-      name: userData.name as string || null,
-      avatar_url: userData.avatar_url as string || null,
-      role: userData.role as 'admin' | 'user',
-      criado_em: userData.criado_em as string || new Date().toISOString(),
-    };
+    return buildUserFromDoc(snapshot.docs[0].id, userData as Record<string, unknown>);
   } catch (error) {
     logger.error('authService', 'Erro ao verificar sessão', error);
     localStorage.removeItem(SESSION_KEY);
